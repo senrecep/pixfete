@@ -53,7 +53,8 @@ services:
     networks:
       - dokploy-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/api/health || exit 1"]
+      # Use bun (always in the image) instead of wget, which isn't guaranteed.
+      test: ["CMD", "bun", "-e", "fetch('http://localhost:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -81,13 +82,15 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-    depends_on:
-      api:
-        condition: service_healthy
+    # No depends_on: the browser talks to the API directly over its public URL,
+    # so the web server has no server-to-server dependency on the API being up.
+    # Coupling its startup to the API's health only risks blocking the web boot.
     networks:
       - dokploy-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ || exit 1"]
+      # Liveness only: any HTTP response means the server is up. node 22 has a
+      # global fetch, so this needs no extra binary (wget/curl) in the image.
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(()=>process.exit(0)).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3
