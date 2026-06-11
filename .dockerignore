@@ -1,0 +1,35 @@
+# Dependencies & build output (rebuilt inside the image)
+**/node_modules/
+**/.next/
+**/dist/
+**/out/
+**/*.tsbuildinfo
+
+# Secrets & local env — injected via Dokploy UI / runtime, never baked in
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+
+# Runtime data that lives on volumes, not in the image
+data/
+uploads/
+
+# VCS, tooling & agent scratch
+.git/
+.github/
+.vscode/
+.claude/
+.omc/
+.serena/
+
+# Docs & misc (not needed at build/runtime)
+**/*.log
+**/*.md
+.DS_Store
+Thumbs.db
+**/*.swp
+
+# Compose files are not needed inside the build context
+docker-compose*.yml

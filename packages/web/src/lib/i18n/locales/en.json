@@ -1,0 +1,453 @@
+{
+  "strings": {
+    "nav": {
+      "home": "Home",
+      "gallery": "Gallery",
+      "upload": "Upload Photos",
+      "qr": "QR Code",
+      "menuOpen": "Open menu",
+      "menuClose": "Close menu"
+    },
+    "home": {
+      "uploadBtn": "Upload Photo",
+      "galleryBtn": "View Gallery",
+      "dateLabel": "Date & Time",
+      "venueLabel": "Venue",
+      "eventDate": "July 11, 2026",
+      "eventDay": "Saturday · 7:00 PM",
+      "shareLabel": "Share this site",
+      "qrDownload": "Download QR code & invitation →",
+      "countdown": {
+        "days": "Days",
+        "hours": "Hours",
+        "minutes": "Minutes",
+        "seconds": "Seconds"
+      }
+    },
+    "upload": {
+      "steps": {
+        "identity": "Info",
+        "select": "Select",
+        "uploading": "Uploading",
+        "success": "Done"
+      },
+      "identity": {
+        "title": "Introduce yourself",
+        "subtitle": "Enter your name before uploading photos.",
+        "nameLabel": "Full Name *",
+        "namePlaceholder": "e.g. Jane Smith",
+        "phoneLabel": "Phone Number (optional)",
+        "phonePlaceholder": "+1 555 000 0000",
+        "continueBtn": "Continue",
+        "backHome": "Back to home",
+        "invalidInput": "Invalid input"
+      },
+      "select": {
+        "dropTitle": "Drag photos here",
+        "dropSub": "or click to select · {remaining} remaining",
+        "selectBtn": "Select Files",
+        "clearAll": "Clear all",
+        "selectedInfo": "{valid} photo(s) selected · {count}/{max}",
+        "uploadBtn": "Upload {count} Photo(s)",
+        "uploadBtnEmpty": "Upload",
+        "tooMany": "You can upload a maximum of {max} photos",
+        "onlyNMore": "Only {n} more photo(s) can be added"
+      },
+      "uploading": {
+        "title": "Uploading your photos…",
+        "progress": "Overall progress {pct}%"
+      },
+      "success": {
+        "title": "Photos received!",
+        "subtitle": "They will appear in the gallery after approval. Save the link below to track your photos.",
+        "copyLink": "Copy Link",
+        "myPhotos": "My Photos",
+        "backGallery": "Back to Gallery",
+        "uploadMore": "Upload More"
+      },
+      "resume": {
+        "continueAs": "Uploading as {name}",
+        "switchIdentity": "Not you? Switch"
+      },
+      "sessionCreateError": "Could not create session, please try again",
+      "uploadFailedError": "Upload failed",
+      "prepareFailedError": "Could not prepare upload"
+    },
+    "gallery": {
+      "eyebrow": "Our Memories",
+      "emptyTitle": "No approved photos yet",
+      "emptySub": "Be the first to share — photos will appear here once approved.",
+      "loadError": "Could not load photos",
+      "expandPhoto": "Expand photo by {name}",
+      "lightbox": {
+        "label": "Photo viewer",
+        "close": "Close",
+        "prev": "Previous photo",
+        "next": "Next photo"
+      }
+    },
+    "myPhotos": {
+      "eyebrow": "My Photos",
+      "defaultTitle": "Your Uploads",
+      "shareHint": "Share this URL to show your photos.",
+      "copyLink": "Copy Link",
+      "addPhotos": "Add Photos",
+      "invalidTitle": "Invalid link",
+      "noPhotosTitle": "No photos yet",
+      "loadError": "Could not load photos",
+      "sections": {
+        "pending": {
+          "title": "Awaiting Approval",
+          "hint": "Will appear in the gallery after admin review."
+        },
+        "approved": {
+          "title": "Approved",
+          "hint": "These photos are live in the gallery."
+        },
+        "rejected": {
+          "title": "Rejected",
+          "hint": "These photos were not published."
+        }
+      }
+    },
+    "qr": {
+      "eyebrow": "Share",
+      "description": "Share the QR code so your guests can upload photos.",
+      "pngBtn": "Download PNG",
+      "copyLink": "Copy Link",
+      "preparing": "Preparing QR code…",
+      "cardDate": "July 11, 2026, Saturday 7:00 PM",
+      "cardQrLine": "QR code and site link",
+      "qrError": "Could not generate QR code",
+      "pngDownloaded": "QR code downloaded",
+      "pdfError": "Could not generate PDF",
+      "loadingAlt": "Loading QR code",
+      "imgAlt": "QR code: {value}"
+    },
+    "admin": {
+      "login": {
+        "title": "Admin Panel",
+        "subtitle": "Enter your password to continue.",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "••••••••",
+        "loginBtn": "Sign In",
+        "passwordRequired": "Password is required",
+        "loginFailed": "Login failed, please try again"
+      },
+      "layout": {
+        "brand": "Pixfete",
+        "management": "Admin",
+        "logout": "Sign Out",
+        "logoutLabel": "Sign out",
+        "loggedOut": "Signed out",
+        "mobileTitle": "Pixfete Admin",
+        "nav": {
+          "dashboard": "Dashboard",
+          "moderation": "Moderation",
+          "analytics": "Analytics",
+          "settings": "Settings"
+        }
+      },
+      "settings": {
+        "title": "Settings",
+        "subtitle": "Manage event details, storage and upload limits.",
+        "saveBtn": "Save Changes",
+        "saved": "Settings saved",
+        "saveError": "Could not save settings",
+        "loadError": "Could not load settings",
+        "sections": {
+          "event": "Event",
+          "storage": "Storage",
+          "upload": "Upload Limits",
+          "features": "Features"
+        },
+        "event": {
+          "type": "Event Type",
+          "types": {
+            "wedding": "Wedding",
+            "engagement": "Engagement",
+            "birthday": "Birthday",
+            "corporate": "Corporate",
+            "generic": "Generic"
+          },
+          "title": "Title",
+          "subtitle": "Subtitle",
+          "date": "Date",
+          "time": "Time",
+          "hour": "Hour",
+          "minute": "Minute",
+          "venueName": "Venue Name",
+          "venueAddress": "Venue Address",
+          "venueMapsUrl": "Maps URL",
+          "hostsLeft": "Host / Family (left)",
+          "hostsRight": "Host / Family (right)",
+          "accentColor": "Accent Color",
+          "overridesTitle": "Text Overrides (optional)",
+          "overridesHint": "Leave blank to use the wording for the selected event type.",
+          "overrideWelcome": "Welcome text",
+          "overrideGalleryTitle": "Gallery title",
+          "presetLabel": "Preset",
+          "customLabel": "Custom"
+        },
+        "storage": {
+          "provider": "Provider",
+          "basePath": "Base Path (subfolder/prefix)",
+          "uploadsDir": "Uploads Directory (local)",
+          "r2Endpoint": "R2 Endpoint",
+          "r2AccessKey": "R2 Access Key",
+          "r2SecretKey": "R2 Secret Key",
+          "r2Bucket": "R2 Bucket",
+          "r2PublicUrl": "R2 Public URL",
+          "gdriveFolderId": "Drive Folder ID",
+          "gdriveServiceAccount": "Service Account JSON",
+          "secretSet": "•••••• saved — leave blank to keep"
+        },
+        "upload": {
+          "maxFileSizeMb": "Max File Size (MB)",
+          "maxFilesPerSession": "Max Files Per Session",
+          "rateLimitUploadsPerHour": "Upload Rate Limit (per hour)"
+        },
+        "features": {
+          "phoneField": "Show Phone Field"
+        },
+        "language": {
+          "label": "Site Language",
+          "hint": "The language shown to all guests.",
+          "en": "English",
+          "tr": "Turkish"
+        },
+        "location": {
+          "label": "Location (map)",
+          "modeMap": "Map / Location",
+          "modeUrl": "Manual URL",
+          "hint": "Search a place or click the map to drop a pin.",
+          "searchPlaceholder": "Search a place (e.g. Kandela Garden)",
+          "searchBtn": "Search",
+          "searching": "Searching…",
+          "lat": "Latitude",
+          "lng": "Longitude",
+          "clear": "Clear location",
+          "empty": "Search a place or enter coordinates to show the map.",
+          "noResults": "No results",
+          "urlNoCoords": "Couldn't read coordinates from this URL — the map won't show. Use a full Google/OpenStreetMap link with coordinates.",
+          "resolving": "Resolving location…"
+        }
+      },
+      "dashboard": {
+        "title": "Dashboard",
+        "subtitle": "Overview and recent activity.",
+        "stats": {
+          "total": "Total Photos",
+          "pending": "Pending",
+          "approved": "Approved",
+          "rejected": "Rejected",
+          "uploaders": "Uploaders",
+          "storage": "Storage",
+          "today": "Today",
+          "thisWeek": "This Week"
+        },
+        "recentUploads": "Recent Uploads",
+        "recentEvents": "Recent Analytics Events",
+        "noUploads": "No uploads yet.",
+        "noEvents": "No events recorded.",
+        "quickApproved": "Approved",
+        "quickRejected": "Rejected",
+        "loadError": "Could not load data",
+        "actionError": "Operation failed",
+        "approveLabel": "Approve",
+        "rejectLabel": "Reject"
+      },
+      "moderation": {
+        "title": "Moderation",
+        "subtitle": "Approve, reject, or delete photos.",
+        "tabs": {
+          "all": "All",
+          "pending": "Pending",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        },
+        "selectAll": "Select All",
+        "deselectAll": "Deselect All",
+        "selectedCount": "{count} selected",
+        "bulkApprove": "Bulk Approve",
+        "bulkReject": "Bulk Reject",
+        "emptyFilter": "No photos for this filter",
+        "rejectModal": {
+          "title": "Rejection Reason",
+          "hint": "You can optionally enter a reason visible to the uploader.",
+          "reasonLabel": "Reason (optional)",
+          "reasonPlaceholder": "e.g. Blurry photo",
+          "cancel": "Cancel",
+          "confirm": "Reject"
+        },
+        "prev": "Previous",
+        "next": "Next",
+        "bulkApprovedMsg": "Selected photos approved",
+        "bulkRejectedMsg": "Selected photos rejected",
+        "approvedMsg": "Approved",
+        "rejectedMsg": "Rejected",
+        "deletedMsg": "Deleted",
+        "loadError": "Could not load photos",
+        "actionError": "Operation failed",
+        "deleteError": "Could not delete",
+        "card": {
+          "approve": "Approve",
+          "reject": "Reject",
+          "delete": "Delete",
+          "reason": "Reason: {reason}",
+          "expandPhoto": "Expand {name}'s photo",
+          "selectPhoto": "Select {name}'s photo",
+          "photoAlt": "{name}'s photo"
+        }
+      },
+      "analytics": {
+        "title": "Analytics",
+        "subtitle": "Event statistics and uploader data.",
+        "filterFrom": "From",
+        "filterTo": "To",
+        "filterEventType": "Event Type",
+        "filterEventTypePlaceholder": "e.g. upload_complete",
+        "filterBtn": "Filter",
+        "loadError": "Could not load analytics",
+        "totalEvents": "Total Events",
+        "uniqueIps": "Unique IPs",
+        "uploaders": "Uploaders",
+        "dailyUploads": "Daily Uploads",
+        "daysPeak": "{days} days · peak {peak}",
+        "noData": "No data.",
+        "uploadersTitle": "Uploaders",
+        "colName": "Name",
+        "colPhone": "Phone",
+        "colPhotos": "Photos",
+        "colStorage": "Storage",
+        "colFirst": "First",
+        "colLast": "Last",
+        "approvedShort": "{count} approved",
+        "noUploaders": "No uploaders yet.",
+        "recentEvents": "Recent Events",
+        "colEvent": "Event",
+        "colIp": "IP",
+        "colTime": "Time",
+        "noEvents": "No events recorded."
+      }
+    },
+    "notFound": {
+      "title": "Page not found",
+      "subtitle": "The page you're looking for doesn't exist.",
+      "backHome": "Back to Home"
+    },
+    "footer": {
+      "madeWith": "Made with love"
+    },
+    "directions": {
+      "title": "Get directions",
+      "google": "Google Maps",
+      "apple": "Apple Maps",
+      "yandex": "Yandex Maps"
+    },
+    "filePreview": {
+      "removeLabel": "Remove {name}"
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "copyButton": {
+      "label": "Copy",
+      "copied": "Copied",
+      "success": "Link copied",
+      "error": "Could not copy"
+    },
+    "errorBoundary": {
+      "title": "Something went wrong",
+      "subtitle": "An unexpected error occurred. Please try again.",
+      "retry": "Try Again"
+    },
+    "eventTypes": {
+      "wedding": {
+        "welcome": "Welcome to Our Wedding",
+        "eventDay": "The big day is here!",
+        "elapsedTitle": "Time since our wedding",
+        "galleryTitle": "Wedding Gallery",
+        "photoAlt": "Wedding photo shared by {name}",
+        "qrTitle": "QR Code & Invitation",
+        "pdfBtn": "PDF Invitation",
+        "cardTitle": "Invitation Card Contents",
+        "pdfDownloaded": "Invitation card downloaded",
+        "invitationTitle": "Wedding Invitation",
+        "invitationKicker": "Wedding Invitation"
+      },
+      "engagement": {
+        "welcome": "Welcome to Our Engagement",
+        "eventDay": "The big day is here!",
+        "elapsedTitle": "Time since our engagement",
+        "galleryTitle": "Engagement Gallery",
+        "photoAlt": "Engagement photo shared by {name}",
+        "qrTitle": "QR Code & Invitation",
+        "pdfBtn": "PDF Invitation",
+        "cardTitle": "Invitation Card Contents",
+        "pdfDownloaded": "Invitation card downloaded",
+        "invitationTitle": "Engagement Invitation",
+        "invitationKicker": "Engagement Invitation"
+      },
+      "birthday": {
+        "welcome": "Welcome to the Party",
+        "eventDay": "The big day is here!",
+        "elapsedTitle": "Time since the celebration",
+        "galleryTitle": "Party Gallery",
+        "photoAlt": "Party photo shared by {name}",
+        "qrTitle": "QR Code & Invitation",
+        "pdfBtn": "PDF Invitation",
+        "cardTitle": "Invitation Card Contents",
+        "pdfDownloaded": "Invitation downloaded",
+        "invitationTitle": "Birthday Invitation",
+        "invitationKicker": "Birthday Invitation"
+      },
+      "corporate": {
+        "welcome": "Welcome to Our Event",
+        "eventDay": "The day is here!",
+        "elapsedTitle": "Time since the event",
+        "galleryTitle": "Event Gallery",
+        "photoAlt": "Event photo shared by {name}",
+        "qrTitle": "QR Code & Invitation",
+        "pdfBtn": "PDF Invitation",
+        "cardTitle": "Invitation Card Contents",
+        "pdfDownloaded": "Invitation downloaded",
+        "invitationTitle": "Event Invitation",
+        "invitationKicker": "Event Invitation"
+      },
+      "generic": {
+        "welcome": "Welcome to Our Event",
+        "eventDay": "The day is here!",
+        "elapsedTitle": "Time since the event",
+        "galleryTitle": "Gallery",
+        "photoAlt": "Photo shared by {name}",
+        "qrTitle": "QR Code & Invitation",
+        "pdfBtn": "PDF Invitation",
+        "cardTitle": "Invitation Card Contents",
+        "pdfDownloaded": "Invitation downloaded",
+        "invitationTitle": "Invitation",
+        "invitationKicker": "Invitation"
+      }
+    }
+  },
+  "errors": {
+    "Upload.FileTooLarge": "File is too large (max {max}MB).",
+    "Upload.InvalidMimeType": "Unsupported file type. Use JPEG, PNG, WebP, HEIC or TIFF.",
+    "Upload.SessionNotFound": "Session not found. Please refresh and try again.",
+    "Upload.SessionExpired": "Your session has expired. Please start over.",
+    "Upload.TooManyFiles": "Maximum {max} files per session.",
+    "Upload.PresignFailed": "Could not prepare upload. Please try again.",
+    "Upload.StorageFailed": "Storage error. Please try again later.",
+    "Upload.NotComplete": "Upload did not complete. Please try again.",
+    "Auth.InvalidCredentials": "Incorrect password.",
+    "Auth.SessionInvalid": "Session expired. Please sign in again.",
+    "Auth.RateLimited": "Too many requests. Please wait.",
+    "Photo.NotFound": "Photo not found.",
+    "Photo.AlreadyProcessed": "Already processed.",
+    "Config.StorageNotConfigured": "Storage not configured. Contact the administrator.",
+    "unknown": "An unexpected error occurred.",
+    "network": "Network error. Check your connection."
+  }
+}

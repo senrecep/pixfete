@@ -1,0 +1,453 @@
+{
+  "strings": {
+    "nav": {
+      "home": "Ana Sayfa",
+      "gallery": "Galeri",
+      "upload": "Fotoğraf Yükle",
+      "qr": "QR Kod",
+      "menuOpen": "Menüyü aç",
+      "menuClose": "Menüyü kapat"
+    },
+    "home": {
+      "uploadBtn": "Fotoğraf Yükle",
+      "galleryBtn": "Galeriyi Gör",
+      "dateLabel": "Tarih & Saat",
+      "venueLabel": "Mekan",
+      "eventDate": "11 Temmuz 2026",
+      "eventDay": "Cumartesi · 19:00",
+      "shareLabel": "Siteyi Paylaş",
+      "qrDownload": "QR kod ve davetiye kartını indir →",
+      "countdown": {
+        "days": "Gün",
+        "hours": "Saat",
+        "minutes": "Dakika",
+        "seconds": "Saniye"
+      }
+    },
+    "upload": {
+      "steps": {
+        "identity": "Bilgiler",
+        "select": "Seçim",
+        "uploading": "Yükleme",
+        "success": "Tamam"
+      },
+      "identity": {
+        "title": "Kendinizi tanıtın",
+        "subtitle": "Fotoğraflarınızı yüklemeden önce adınızı girin.",
+        "nameLabel": "Adınız Soyadınız *",
+        "namePlaceholder": "Örn. Ayşe Yılmaz",
+        "phoneLabel": "Telefon Numarası (opsiyonel)",
+        "phonePlaceholder": "05XX XXX XX XX",
+        "continueBtn": "Devam Et",
+        "backHome": "Ana sayfaya dön",
+        "invalidInput": "Geçersiz bilgi"
+      },
+      "select": {
+        "dropTitle": "Fotoğrafları buraya sürükleyin",
+        "dropSub": "veya seçmek için tıklayın · kalan kota {remaining}",
+        "selectBtn": "Dosya Seç",
+        "clearAll": "Tümünü temizle",
+        "selectedInfo": "{valid} fotoğraf seçildi · {count}/{max}",
+        "uploadBtn": "{count} Fotoğrafı Yükle",
+        "uploadBtnEmpty": "Yükle",
+        "tooMany": "En fazla {max} fotoğraf yükleyebilirsiniz",
+        "onlyNMore": "Sadece {n} fotoğraf daha eklenebilir"
+      },
+      "uploading": {
+        "title": "Fotoğraflarınız yükleniyor…",
+        "progress": "Genel ilerleme {pct}%"
+      },
+      "success": {
+        "title": "Fotoğraflarınız alındı!",
+        "subtitle": "Onaylandıktan sonra galeride görünecek. Aşağıdaki bağlantıyı saklayarak fotoğraflarınızın durumunu takip edebilirsiniz.",
+        "copyLink": "Bağlantıyı Kopyala",
+        "myPhotos": "Fotoğraflarım",
+        "backGallery": "Galeriye Dön",
+        "uploadMore": "Daha Fazla Yükle"
+      },
+      "resume": {
+        "continueAs": "{name} olarak yüklüyorsun",
+        "switchIdentity": "Sen değil misin? Değiştir"
+      },
+      "sessionCreateError": "Oturum oluşturulamadı, tekrar deneyin",
+      "uploadFailedError": "Yükleme başarısız",
+      "prepareFailedError": "Yükleme hazırlanamadı"
+    },
+    "gallery": {
+      "eyebrow": "Anılarımız",
+      "emptyTitle": "Henüz onaylı fotoğraf yok",
+      "emptySub": "İlk anıyı sen paylaş — fotoğraflar onaylandıkça burada görünecek.",
+      "loadError": "Fotoğraflar yüklenemedi",
+      "expandPhoto": "{name} tarafından yüklenen fotoğrafı büyüt",
+      "lightbox": {
+        "label": "Fotoğraf görüntüleyici",
+        "close": "Kapat",
+        "prev": "Önceki fotoğraf",
+        "next": "Sonraki fotoğraf"
+      }
+    },
+    "myPhotos": {
+      "eyebrow": "Fotoğraflarım",
+      "defaultTitle": "Yüklemeleriniz",
+      "shareHint": "Bu URL'yi paylaşarak fotoğraflarınızı gösterebilirsiniz.",
+      "copyLink": "Bağlantıyı Kopyala",
+      "addPhotos": "Fotoğraf Ekle",
+      "invalidTitle": "Bağlantı geçersiz",
+      "noPhotosTitle": "Henüz fotoğraf yok",
+      "loadError": "Fotoğraflar yüklenemedi",
+      "sections": {
+        "pending": {
+          "title": "Onay Bekliyor",
+          "hint": "Yönetici onayından sonra galeride görünecek."
+        },
+        "approved": {
+          "title": "Onaylandı",
+          "hint": "Bu fotoğraflar galeride yayında."
+        },
+        "rejected": {
+          "title": "Reddedildi",
+          "hint": "Bu fotoğraflar yayınlanmadı."
+        }
+      }
+    },
+    "qr": {
+      "eyebrow": "Paylaş",
+      "description": "Misafirlerinizin fotoğraf yüklemesi için QR kodu paylaşın.",
+      "pngBtn": "PNG İndir",
+      "copyLink": "Bağlantıyı Kopyala",
+      "preparing": "QR kod hazırlanıyor…",
+      "cardDate": "11 Temmuz 2026, Cumartesi 19:00",
+      "cardQrLine": "QR kod ve site bağlantısı",
+      "qrError": "QR kod oluşturulamadı",
+      "pngDownloaded": "QR kod indirildi",
+      "pdfError": "PDF oluşturulamadı",
+      "loadingAlt": "QR kod yükleniyor",
+      "imgAlt": "QR kod: {value}"
+    },
+    "admin": {
+      "login": {
+        "title": "Yönetim Paneli",
+        "subtitle": "Devam etmek için şifrenizi girin.",
+        "passwordLabel": "Şifre",
+        "passwordPlaceholder": "••••••••",
+        "loginBtn": "Giriş Yap",
+        "passwordRequired": "Şifre gerekli",
+        "loginFailed": "Giriş başarısız, tekrar deneyin"
+      },
+      "layout": {
+        "brand": "Pixfete",
+        "management": "Yönetim",
+        "logout": "Çıkış Yap",
+        "logoutLabel": "Çıkış yap",
+        "loggedOut": "Çıkış yapıldı",
+        "mobileTitle": "Pixfete Yönetim",
+        "nav": {
+          "dashboard": "Panel",
+          "moderation": "Moderasyon",
+          "analytics": "Analitik",
+          "settings": "Ayarlar"
+        }
+      },
+      "settings": {
+        "title": "Ayarlar",
+        "subtitle": "Etkinlik bilgileri, depolama ve yükleme limitlerini yönetin.",
+        "saveBtn": "Değişiklikleri Kaydet",
+        "saved": "Ayarlar kaydedildi",
+        "saveError": "Ayarlar kaydedilemedi",
+        "loadError": "Ayarlar yüklenemedi",
+        "sections": {
+          "event": "Etkinlik",
+          "storage": "Depolama",
+          "upload": "Yükleme Limitleri",
+          "features": "Özellikler"
+        },
+        "event": {
+          "type": "Etkinlik Tipi",
+          "types": {
+            "wedding": "Düğün",
+            "engagement": "Nişan",
+            "birthday": "Doğum Günü",
+            "corporate": "Kurumsal",
+            "generic": "Genel"
+          },
+          "title": "Başlık",
+          "subtitle": "Alt Başlık",
+          "date": "Tarih",
+          "time": "Saat",
+          "hour": "Saat",
+          "minute": "Dakika",
+          "venueName": "Mekan Adı",
+          "venueAddress": "Mekan Adresi",
+          "venueMapsUrl": "Harita URL",
+          "hostsLeft": "Ev sahibi / Aile (sol)",
+          "hostsRight": "Ev sahibi / Aile (sağ)",
+          "accentColor": "Vurgu Rengi",
+          "overridesTitle": "Metin Override (opsiyonel)",
+          "overridesHint": "Boş bırakırsan seçili etkinlik tipinin metni kullanılır.",
+          "overrideWelcome": "Karşılama metni",
+          "overrideGalleryTitle": "Galeri başlığı",
+          "presetLabel": "Hazır",
+          "customLabel": "Özel"
+        },
+        "storage": {
+          "provider": "Sağlayıcı",
+          "basePath": "Temel Yol (alt klasör/prefix)",
+          "uploadsDir": "Yükleme Dizini (local)",
+          "r2Endpoint": "R2 Endpoint",
+          "r2AccessKey": "R2 Access Key",
+          "r2SecretKey": "R2 Secret Key",
+          "r2Bucket": "R2 Bucket",
+          "r2PublicUrl": "R2 Public URL",
+          "gdriveFolderId": "Drive Klasör ID",
+          "gdriveServiceAccount": "Service Account JSON",
+          "secretSet": "•••••• kayıtlı — değiştirmemek için boş bırakın"
+        },
+        "upload": {
+          "maxFileSizeMb": "Maks Dosya Boyutu (MB)",
+          "maxFilesPerSession": "Oturum Başına Maks Dosya",
+          "rateLimitUploadsPerHour": "Saatlik Yükleme Limiti"
+        },
+        "features": {
+          "phoneField": "Telefon Alanını Göster"
+        },
+        "language": {
+          "label": "Site Dili",
+          "hint": "Tüm misafirlere gösterilen dil.",
+          "en": "İngilizce",
+          "tr": "Türkçe"
+        },
+        "location": {
+          "label": "Konum (harita)",
+          "modeMap": "Harita / Konum",
+          "modeUrl": "Manuel URL",
+          "hint": "Bir yer ara veya haritaya tıklayarak iğne bırak.",
+          "searchPlaceholder": "Konum ara (ör. Kandela Garden)",
+          "searchBtn": "Ara",
+          "searching": "Aranıyor…",
+          "lat": "Enlem",
+          "lng": "Boylam",
+          "clear": "Konumu temizle",
+          "empty": "Haritayı göstermek için bir yer ara veya koordinat gir.",
+          "noResults": "Sonuç bulunamadı",
+          "urlNoCoords": "Bu URL'den konum okunamadı — harita gösterilmez. Koordinat içeren tam bir Google/OpenStreetMap linki kullanın.",
+          "resolving": "Konum çözümleniyor…"
+        }
+      },
+      "dashboard": {
+        "title": "Panel",
+        "subtitle": "Genel durum ve son aktiviteler.",
+        "stats": {
+          "total": "Toplam Fotoğraf",
+          "pending": "Onay Bekleyen",
+          "approved": "Onaylanan",
+          "rejected": "Reddedilen",
+          "uploaders": "Yükleyenler",
+          "storage": "Depolama",
+          "today": "Bugün",
+          "thisWeek": "Bu Hafta"
+        },
+        "recentUploads": "Son Yüklemeler",
+        "recentEvents": "Son Analitik Olayları",
+        "noUploads": "Henüz yükleme yok.",
+        "noEvents": "Henüz olay kaydı yok.",
+        "quickApproved": "Onaylandı",
+        "quickRejected": "Reddedildi",
+        "loadError": "Veriler yüklenemedi",
+        "actionError": "İşlem başarısız",
+        "approveLabel": "Onayla",
+        "rejectLabel": "Reddet"
+      },
+      "moderation": {
+        "title": "Moderasyon",
+        "subtitle": "Fotoğrafları onaylayın, reddedin veya silin.",
+        "tabs": {
+          "all": "Tümü",
+          "pending": "Bekleyen",
+          "approved": "Onaylanan",
+          "rejected": "Reddedilen"
+        },
+        "selectAll": "Tümünü Seç",
+        "deselectAll": "Seçimi Kaldır",
+        "selectedCount": "{count} seçili",
+        "bulkApprove": "Toplu Onayla",
+        "bulkReject": "Toplu Reddet",
+        "emptyFilter": "Bu filtrede fotoğraf yok",
+        "rejectModal": {
+          "title": "Reddetme Sebebi",
+          "hint": "İsteğe bağlı olarak yükleyene gösterilecek bir sebep girebilirsiniz.",
+          "reasonLabel": "Sebep (opsiyonel)",
+          "reasonPlaceholder": "Örn. Bulanık fotoğraf",
+          "cancel": "İptal",
+          "confirm": "Reddet"
+        },
+        "prev": "Önceki",
+        "next": "Sonraki",
+        "bulkApprovedMsg": "Seçilenler onaylandı",
+        "bulkRejectedMsg": "Seçilenler reddedildi",
+        "approvedMsg": "Onaylandı",
+        "rejectedMsg": "Reddedildi",
+        "deletedMsg": "Silindi",
+        "loadError": "Fotoğraflar yüklenemedi",
+        "actionError": "İşlem başarısız",
+        "deleteError": "Silinemedi",
+        "card": {
+          "approve": "Onayla",
+          "reject": "Reddet",
+          "delete": "Sil",
+          "reason": "Sebep: {reason}",
+          "expandPhoto": "{name} fotoğrafını büyüt",
+          "selectPhoto": "{name} fotoğrafını seç",
+          "photoAlt": "{name} fotoğrafı"
+        }
+      },
+      "analytics": {
+        "title": "Analitik",
+        "subtitle": "Etkinlik istatistikleri ve yükleyici verileri.",
+        "filterFrom": "Başlangıç",
+        "filterTo": "Bitiş",
+        "filterEventType": "Olay Türü",
+        "filterEventTypePlaceholder": "örn. upload_complete",
+        "filterBtn": "Filtrele",
+        "loadError": "Analitik yüklenemedi",
+        "totalEvents": "Toplam Olay",
+        "uniqueIps": "Benzersiz IP",
+        "uploaders": "Yükleyenler",
+        "dailyUploads": "Günlük Yüklemeler",
+        "daysPeak": "{days} gün · en yüksek {peak}",
+        "noData": "Veri yok.",
+        "uploadersTitle": "Yükleyenler",
+        "colName": "İsim",
+        "colPhone": "Telefon",
+        "colPhotos": "Fotoğraf",
+        "colStorage": "Depolama",
+        "colFirst": "İlk",
+        "colLast": "Son",
+        "approvedShort": "{count} onaylı",
+        "noUploaders": "Henüz yükleyici yok.",
+        "recentEvents": "Son Olaylar",
+        "colEvent": "Olay",
+        "colIp": "IP",
+        "colTime": "Zaman",
+        "noEvents": "Olay kaydı yok."
+      }
+    },
+    "notFound": {
+      "title": "Sayfa bulunamadı",
+      "subtitle": "Aradığınız sayfa mevcut değil.",
+      "backHome": "Ana Sayfaya Dön"
+    },
+    "footer": {
+      "madeWith": "Sevgiyle hazırlandı"
+    },
+    "directions": {
+      "title": "Yol tarifi al",
+      "google": "Google Haritalar",
+      "apple": "Apple Haritalar",
+      "yandex": "Yandex Haritalar"
+    },
+    "filePreview": {
+      "removeLabel": "{name} dosyasını kaldır"
+    },
+    "status": {
+      "pending": "Onay Bekliyor",
+      "approved": "Onaylandı",
+      "rejected": "Reddedildi"
+    },
+    "copyButton": {
+      "label": "Kopyala",
+      "copied": "Kopyalandı",
+      "success": "Bağlantı kopyalandı",
+      "error": "Kopyalanamadı"
+    },
+    "errorBoundary": {
+      "title": "Bir şeyler ters gitti",
+      "subtitle": "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.",
+      "retry": "Tekrar Dene"
+    },
+    "eventTypes": {
+      "wedding": {
+        "welcome": "Düğünümüze Hoş Geldiniz",
+        "eventDay": "Büyük gün geldi!",
+        "elapsedTitle": "Düğünümüzden bu kadar zaman geçti",
+        "galleryTitle": "Düğün Galerisi",
+        "photoAlt": "{name} tarafından paylaşılan düğün fotoğrafı",
+        "qrTitle": "QR Kod & Davetiye",
+        "pdfBtn": "PDF Davetiye",
+        "cardTitle": "Davetiye Kartı İçeriği",
+        "pdfDownloaded": "Davetiye kartı indirildi",
+        "invitationTitle": "Düğün Davetiyesi",
+        "invitationKicker": "Düğün Davetiyesi"
+      },
+      "engagement": {
+        "welcome": "Nişanımıza Hoş Geldiniz",
+        "eventDay": "Büyük gün geldi!",
+        "elapsedTitle": "Nişanımızdan bu kadar zaman geçti",
+        "galleryTitle": "Nişan Galerisi",
+        "photoAlt": "{name} tarafından paylaşılan nişan fotoğrafı",
+        "qrTitle": "QR Kod & Davetiye",
+        "pdfBtn": "PDF Davetiye",
+        "cardTitle": "Davetiye Kartı İçeriği",
+        "pdfDownloaded": "Davetiye kartı indirildi",
+        "invitationTitle": "Nişan Davetiyesi",
+        "invitationKicker": "Nişan Davetiyesi"
+      },
+      "birthday": {
+        "welcome": "Doğum Günü Partimize Hoş Geldiniz",
+        "eventDay": "Büyük gün geldi!",
+        "elapsedTitle": "Kutlamadan bu kadar zaman geçti",
+        "galleryTitle": "Parti Galerisi",
+        "photoAlt": "{name} tarafından paylaşılan parti fotoğrafı",
+        "qrTitle": "QR Kod & Davet",
+        "pdfBtn": "PDF Davet",
+        "cardTitle": "Davet Kartı İçeriği",
+        "pdfDownloaded": "Davet kartı indirildi",
+        "invitationTitle": "Doğum Günü Daveti",
+        "invitationKicker": "Doğum Günü Daveti"
+      },
+      "corporate": {
+        "welcome": "Etkinliğimize Hoş Geldiniz",
+        "eventDay": "Gün geldi!",
+        "elapsedTitle": "Etkinlikten bu kadar zaman geçti",
+        "galleryTitle": "Etkinlik Galerisi",
+        "photoAlt": "{name} tarafından paylaşılan etkinlik fotoğrafı",
+        "qrTitle": "QR Kod & Davet",
+        "pdfBtn": "PDF Davet",
+        "cardTitle": "Davet Kartı İçeriği",
+        "pdfDownloaded": "Davet kartı indirildi",
+        "invitationTitle": "Etkinlik Daveti",
+        "invitationKicker": "Etkinlik Daveti"
+      },
+      "generic": {
+        "welcome": "Etkinliğimize Hoş Geldiniz",
+        "eventDay": "Gün geldi!",
+        "elapsedTitle": "Etkinlikten bu kadar zaman geçti",
+        "galleryTitle": "Galeri",
+        "photoAlt": "{name} tarafından paylaşılan fotoğraf",
+        "qrTitle": "QR Kod & Davet",
+        "pdfBtn": "PDF Davet",
+        "cardTitle": "Davet Kartı İçeriği",
+        "pdfDownloaded": "Davet kartı indirildi",
+        "invitationTitle": "Davet",
+        "invitationKicker": "Davet"
+      }
+    }
+  },
+  "errors": {
+    "Upload.FileTooLarge": "Dosya çok büyük (max {max}MB).",
+    "Upload.InvalidMimeType": "Desteklenmeyen dosya türü. JPEG, PNG, WebP, HEIC veya TIFF kullanın.",
+    "Upload.SessionNotFound": "Oturum bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.",
+    "Upload.SessionExpired": "Oturumunuz sona erdi. Lütfen baştan başlayın.",
+    "Upload.TooManyFiles": "Oturum başına en fazla {max} dosya yükleyebilirsiniz.",
+    "Upload.PresignFailed": "Yükleme hazırlanamadı. Lütfen tekrar deneyin.",
+    "Upload.StorageFailed": "Depolama hatası oluştu. Lütfen daha sonra tekrar deneyin.",
+    "Upload.NotComplete": "Yükleme tamamlanamadı. Lütfen tekrar deneyin.",
+    "Auth.InvalidCredentials": "Hatalı şifre.",
+    "Auth.SessionInvalid": "Oturum sona erdi. Lütfen tekrar giriş yapın.",
+    "Auth.RateLimited": "Çok fazla istek. Lütfen bekleyin.",
+    "Photo.NotFound": "Fotoğraf bulunamadı.",
+    "Photo.AlreadyProcessed": "Bu fotoğraf zaten işlendi.",
+    "Config.StorageNotConfigured": "Depolama yapılandırılmamış. Yöneticiyle iletişime geçin.",
+    "unknown": "Beklenmeyen bir hata oluştu.",
+    "network": "Ağ hatası. Bağlantınızı kontrol edin."
+  }
+}

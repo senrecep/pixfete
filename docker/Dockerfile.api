@@ -1,0 +1,35 @@
+FROM oven/bun:1.2-alpine AS base
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json bun.lock ./
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/storage/package.json ./packages/storage/
+COPY packages/api/package.json ./packages/api/
+RUN bun install --frozen-lockfile
+
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+COPY --from=deps /app/packages/storage/node_modules ./packages/storage/node_modules
+COPY --from=deps /app/packages/api/node_modules ./packages/api/node_modules
+COPY packages/shared ./packages/shared
+COPY packages/storage ./packages/storage
+COPY packages/api ./packages/api
+COPY tsconfig.base.json ./
+
+FROM base AS runner
+RUN addgroup --system --gid 1001 pixfete && \
+    adduser --system --uid 1001 pixfete
+RUN mkdir -p /app/data /app/uploads && chown -R pixfete:pixfete /app
+
+COPY --from=builder --chown=pixfete:pixfete /app/node_modules ./node_modules
+COPY --from=builder --chown=pixfete:pixfete /app/packages/shared ./packages/shared
+COPY --from=builder --chown=pixfete:pixfete /app/packages/storage ./packages/storage
+COPY --from=builder --chown=pixfete:pixfete /app/packages/api ./packages/api
+COPY --from=builder --chown=pixfete:pixfete /app/tsconfig.base.json ./
+
+USER pixfete
+EXPOSE 3001
+
+CMD ["bun", "run", "packages/api/src/index.ts"]

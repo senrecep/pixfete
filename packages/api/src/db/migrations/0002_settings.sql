@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS app_settings (
+  id INTEGER PRIMARY KEY,
+  data TEXT NOT NULL,
+  updated_at INTEGER NOT NULL
+);

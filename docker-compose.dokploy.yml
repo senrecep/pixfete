@@ -1,0 +1,112 @@
+# =============================================================================
+# pixfete — Dokploy / Production
+# =============================================================================
+#
+# Two services: `api` (Bun/Elysia + SQLite, port 3001) and `web` (Next.js, 3000).
+# Traefik (built into Dokploy) terminates TLS and routes by domain, so NO host
+# ports are published here — set the container port per service in the Dokploy
+# Domains tab instead (web → 3000, api → 3001).
+#
+# DEPLOYMENT (Dokploy UI):
+#   1. New project → add a "Docker Compose" service
+#   2. Source: this Git repo · Compose file path: docker-compose.dokploy.yml
+#   3. Environment tab → set the env vars listed below
+#   4. Service → Build → Build Args → set NEXT_PUBLIC_API_URL & NEXT_PUBLIC_SITE_URL
+#      (NEXT_PUBLIC_* are baked into the browser bundle at BUILD time — the
+#       `environment:` block alone is NOT enough for the web service)
+#   5. Domains tab → web: your site domain → port 3000
+#                  → api: your api domain  → port 3001
+#   6. Disable "Enable Isolated Deployment" so both services share dokploy-network
+#
+# REQUIRED env vars (Dokploy → Environment):
+#   ADMIN_PASSWORD_HASH   bcrypt hash — escape every `$` as `$$` in the value
+#                         (compose treats `$` as variable interpolation)
+#   JWT_SECRET            openssl rand -hex 32
+#   SETTINGS_ENCRYPTION_KEY  openssl rand -hex 32 (falls back to JWT_SECRET if unset)
+#   CORS_ORIGIN           public web URL, e.g. https://photos.example.com
+#   NEXT_PUBLIC_API_URL   public API URL,  e.g. https://api.example.com  (also a Build Arg)
+#   NEXT_PUBLIC_SITE_URL  public web URL,  e.g. https://photos.example.com (also a Build Arg)
+#
+# DB schema + uploads persist on named volumes; migrations run automatically on
+# API boot (packages/api/src/index.ts → runMigrations()).
+# =============================================================================
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: pixfete-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      DATABASE_URL: /app/data/pixfete.db
+      UPLOADS_DIR: /app/uploads
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
+      JWT_SECRET: ${JWT_SECRET}
+      SETTINGS_ENCRYPTION_KEY: ${SETTINGS_ENCRYPTION_KEY:-}
+    volumes:
+      - uploads:/app/uploads
+      - db:/app/data
+    networks:
+      - dokploy-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+      args:
+        # Mirror these in Dokploy → Service → Build → Build Args.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+    container_name: pixfete-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - dokploy-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+
+volumes:
+  uploads:
+  db:
+
+networks:
+  dokploy-network:
+    external: true

@@ -1,0 +1,519 @@
+"use client"
+
+import { Header } from "@/components/layout/Header"
+import { Button } from "@/components/ui/Button"
+import { CopyButton } from "@/components/ui/CopyButton"
+import { Input } from "@/components/ui/Input"
+import { Spinner } from "@/components/ui/Spinner"
+import { DropZone } from "@/components/upload/DropZone"
+import { FilePreview } from "@/components/upload/FilePreview"
+import { type UploadItem, UploadProgress } from "@/components/upload/UploadProgress"
+import { useApiError } from "@/hooks/useApiError"
+import { ApiClientError, api } from "@/lib/api"
+import { SITE_URL } from "@/lib/event"
+import { interp } from "@/lib/i18n"
+import { formatBytes, readImageDimensions } from "@/lib/utils"
+import { useEvent } from "@/providers/EventProvider"
+import { useI18n } from "@/providers/I18nProvider"
+import {
+  ALLOWED_MIME_TYPES,
+  type AllowedMimeType,
+  CreateUploadSessionSchema,
+} from "@pixfete/shared"
+import { motion } from "framer-motion"
+import { ArrowLeft, CheckCircle2, ExternalLink, UploadCloud } from "lucide-react"
+import Link from "next/link"
+import { useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
+
+const MAX_FILES = 30
+const MAX_FILE_SIZE = 50 * 1024 * 1024
+const ALLOWED = new Set<string>(ALLOWED_MIME_TYPES)
+// Persisted on the uploader's device so a return visit reuses the same session
+// (and gallery) without re-deriving access from name/phone.
+const TOKEN_STORAGE_KEY = "pixfete_my_token"
+
+type Step = "identity" | "select" | "uploading" | "success"
+
+interface SelectedFile {
+  id: string
+  file: File
+  error?: string | undefined
+}
+
+function makeId(): string {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2)
+}
+
+// GDrive's resumable upload returns file metadata JSON like {"id":"...",...}.
+// Extract the id without JSON.parse (R2 returns an empty body, and the project
+// bans try/catch) — a regex is throw-free for both cases.
+function extractDriveFileId(responseBody: string): string | undefined {
+  return /"id"\s*:\s*"([^"]+)"/.exec(responseBody)?.[1]
+}
+
+function getValidationCode(file: File): string | undefined {
+  if (!ALLOWED.has(file.type)) return "Upload.InvalidMimeType"
+  if (file.size > MAX_FILE_SIZE) return "Upload.FileTooLarge"
+  return undefined
+}
+
+export default function UploadPage() {
+  const { t, te } = useI18n()
+  const { features } = useEvent()
+  const { getErrorMessage } = useApiError()
+
+  const [step, setStep] = useState<Step>("identity")
+  const [name, setName] = useState("")
+  const [phone, setPhone] = useState("")
+  const [nameError, setNameError] = useState<string>()
+  const [creatingSession, setCreatingSession] = useState(false)
+
+  const [sessionId, setSessionId] = useState<string | null>(null)
+  const [viewerToken, setViewerToken] = useState<string | null>(null)
+  const [resumeChecked, setResumeChecked] = useState(false)
+
+  const [files, setFiles] = useState<SelectedFile[]>([])
+  const [uploadItems, setUploadItems] = useState<UploadItem[]>([])
+
+  const validFiles = useMemo(() => files.filter((f) => !f.error), [files])
+  const remaining = MAX_FILES - files.length
+
+  const overallProgress = useMemo(() => {
+    if (uploadItems.length === 0) return 0
+    const total = uploadItems.reduce((sum, item) => sum + item.progress, 0)
+    return total / uploadItems.length
+  }, [uploadItems])
+
+  // On mount, resume an existing session: a `?resume=<token>` query param (e.g.
+  // from the "Add Photos" button on /my/<token>) takes priority over the token
+  // stored on this device. This lets a shared link keep uploading to its gallery.
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      setResumeChecked(true)
+      return
+    }
+    const fromQuery = new URLSearchParams(window.location.search).get("resume")
+    const stored = fromQuery ?? window.localStorage.getItem(TOKEN_STORAGE_KEY)
+    if (!stored) {
+      setResumeChecked(true)
+      return
+    }
+    api.upload
+      .resumeSession(stored)
+      .then((res) => {
+        setSessionId(res.sessionId)
+        setViewerToken(res.viewerToken)
+        setName(res.uploaderName)
+        // Remember it on this device so later visits resume automatically.
+        window.localStorage.setItem(TOKEN_STORAGE_KEY, res.viewerToken)
+        setStep("select")
+      })
+      .catch(() => {
+        // Token no longer valid — drop it and fall back to the identity step.
+        window.localStorage.removeItem(TOKEN_STORAGE_KEY)
+      })
+      .finally(() => setResumeChecked(true))
+  }, [])
+
+  const switchIdentity = () => {
+    if (typeof window !== "undefined") window.localStorage.removeItem(TOKEN_STORAGE_KEY)
+    setSessionId(null)
+    setViewerToken(null)
+    setName("")
+    setPhone("")
+    setFiles([])
+    setUploadItems([])
+    setStep("identity")
+  }
+
+  const onCreateSession = async () => {
+    const parsed = CreateUploadSessionSchema.safeParse({
+      uploaderName: name,
+      uploaderPhone: phone.trim() === "" ? null : phone.trim(),
+    })
+    if (!parsed.success) {
+      const issue = parsed.error.issues[0]
+      setNameError(issue?.message ?? t.upload.identity.invalidInput)
+      return
+    }
+    setNameError(undefined)
+    setCreatingSession(true)
+    try {
+      const res = await api.upload.createSession({
+        uploaderName: parsed.data.uploaderName,
+        ...(parsed.data.uploaderPhone ? { uploaderPhone: parsed.data.uploaderPhone } : {}),
+      })
+      setSessionId(res.sessionId)
+      setViewerToken(res.viewerToken)
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(TOKEN_STORAGE_KEY, res.viewerToken)
+      }
+      setStep("select")
+    } catch (err) {
+      toast.error(
+        err instanceof ApiClientError ? getErrorMessage(err) : t.upload.sessionCreateError,
+      )
+    } finally {
+      setCreatingSession(false)
+    }
+  }
+
+  const addFiles = (incoming: File[]) => {
+    setFiles((prev) => {
+      const space = MAX_FILES - prev.length
+      if (space <= 0) {
+        toast.error(interp(t.upload.select.tooMany, { max: MAX_FILES }))
+        return prev
+      }
+      const accepted = incoming.slice(0, space).map<SelectedFile>((file) => {
+        const errCode = getValidationCode(file)
+        return { id: makeId(), file, error: errCode ? te(errCode) : undefined }
+      })
+      if (incoming.length > space) {
+        toast.error(interp(t.upload.select.onlyNMore, { n: space }))
+      }
+      return [...prev, ...accepted]
+    })
+  }
+
+  const removeFile = (id: string) => {
+    setFiles((prev) => prev.filter((f) => f.id !== id))
+  }
+
+  const startUpload = async () => {
+    if (!sessionId || validFiles.length === 0) return
+    setStep("uploading")
+
+    const withDims = await Promise.all(
+      validFiles.map(async (sf) => ({
+        sf,
+        dims: await readImageDimensions(sf.file),
+      })),
+    )
+
+    setUploadItems(
+      withDims.map(({ sf }) => ({
+        id: sf.id,
+        fileName: sf.file.name,
+        progress: 0,
+        status: "pending" as const,
+      })),
+    )
+
+    try {
+      const prepareRes = await api.upload.prepare({
+        sessionId,
+        files: withDims.map(({ sf, dims }) => ({
+          fileName: sf.file.name,
+          fileSize: sf.file.size,
+          mimeType: sf.file.type as AllowedMimeType,
+          width: dims?.width ?? null,
+          height: dims?.height ?? null,
+        })),
+      })
+
+      await Promise.all(
+        prepareRes.uploads.map(async (prepared, i) => {
+          const entry = withDims[i]
+          if (!entry) return
+          const { sf } = entry
+          const updateItem = (patch: Partial<UploadItem>) =>
+            setUploadItems((prev) => prev.map((it) => (it.id === sf.id ? { ...it, ...patch } : it)))
+
+          updateItem({ status: "uploading" })
+          try {
+            let driveFileId: string | undefined
+            if (prepared.uploadUrl) {
+              const responseBody = await api.upload.uploadToStorage(
+                prepared.uploadUrl,
+                prepared.uploadMethod,
+                sf.file,
+                (p) => updateItem({ progress: p }),
+                prepared.headers,
+                prepared.fields,
+              )
+              // GDrive's resumable endpoint returns the created file's metadata;
+              // capture its `id` so the API can persist the real storage key.
+              driveFileId = extractDriveFileId(responseBody)
+            } else {
+              await api.upload.uploadLocalChunk(prepared.photoId, sf.file, (p) =>
+                updateItem({ progress: p }),
+              )
+            }
+            await api.upload.complete(prepared.photoId, driveFileId)
+            updateItem({ status: "done", progress: 100 })
+          } catch (err) {
+            updateItem({ status: "error", error: getErrorMessage(err) })
+          }
+        }),
+      )
+
+      setStep("success")
+    } catch (err) {
+      toast.error(
+        err instanceof ApiClientError ? getErrorMessage(err) : t.upload.prepareFailedError,
+      )
+      setStep("select")
+    }
+  }
+
+  const personalUrl = viewerToken ? `${SITE_URL}/my/${viewerToken}` : ""
+
+  return (
+    <>
+      <Header />
+      <main className="mx-auto max-w-2xl px-5 py-12">
+        {!resumeChecked ? (
+          <div className="flex justify-center py-24">
+            <Spinner className="h-10 w-10" />
+          </div>
+        ) : (
+          <>
+            <StepIndicator step={step} />
+
+            {step === "identity" ? (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-8 rounded-2xl border border-accent-soft bg-white p-6 shadow-sm sm:p-8"
+              >
+                <h1 className="font-display text-3xl text-accent-dark">
+                  {t.upload.identity.title}
+                </h1>
+                <p className="mt-1 text-sm text-ink/60">{t.upload.identity.subtitle}</p>
+                <div className="mt-6 flex flex-col gap-4">
+                  <Input
+                    label={t.upload.identity.nameLabel}
+                    placeholder={t.upload.identity.namePlaceholder}
+                    value={name}
+                    error={nameError}
+                    autoComplete="name"
+                    onChange={(e) => setName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") onCreateSession()
+                    }}
+                    autoFocus
+                  />
+                  {features.phoneField ? (
+                    <Input
+                      label={t.upload.identity.phoneLabel}
+                      placeholder={t.upload.identity.phonePlaceholder}
+                      inputMode="tel"
+                      autoComplete="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                  ) : null}
+                  <Button
+                    size="lg"
+                    loading={creatingSession}
+                    onClick={onCreateSession}
+                    className="mt-2 w-full"
+                  >
+                    {t.upload.identity.continueBtn}
+                  </Button>
+                </div>
+              </motion.div>
+            ) : null}
+
+            {step === "select" ? (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-8 flex flex-col gap-5"
+              >
+                {viewerToken && name ? (
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-accent-soft bg-accent-soft/40 px-4 py-3 text-sm">
+                    <span className="truncate text-ink/70">
+                      {interp(t.upload.resume.continueAs, { name })}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={switchIdentity}
+                      className="shrink-0 font-medium text-accent transition-colors hover:text-accent-dark"
+                    >
+                      {t.upload.resume.switchIdentity}
+                    </button>
+                  </div>
+                ) : null}
+
+                <DropZone onFiles={addFiles} remaining={remaining} disabled={remaining <= 0} />
+
+                {files.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between text-sm text-ink/60">
+                      <span>
+                        {interp(t.upload.select.selectedInfo, {
+                          valid: validFiles.length,
+                          count: files.length,
+                          max: MAX_FILES,
+                        })}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setFiles([])}
+                        className="text-accent transition-colors hover:text-accent-dark"
+                      >
+                        {t.upload.select.clearAll}
+                      </button>
+                    </div>
+                    {files.map((sf) => (
+                      <FilePreview
+                        key={sf.id}
+                        file={sf.file}
+                        error={sf.error}
+                        onRemove={() => removeFile(sf.id)}
+                      />
+                    ))}
+                  </div>
+                ) : null}
+
+                <Button
+                  size="lg"
+                  onClick={startUpload}
+                  disabled={validFiles.length === 0}
+                  className="w-full"
+                >
+                  <UploadCloud className="h-5 w-5" />
+                  {validFiles.length > 0
+                    ? interp(t.upload.select.uploadBtn, { count: validFiles.length })
+                    : t.upload.select.uploadBtnEmpty}
+                </Button>
+              </motion.div>
+            ) : null}
+
+            {step === "uploading" ? (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-8 flex flex-col gap-4"
+              >
+                <div className="rounded-2xl border border-accent-soft bg-white p-6 text-center shadow-sm">
+                  <p className="font-display text-2xl text-accent-dark">
+                    {t.upload.uploading.title}
+                  </p>
+                  <p className="mt-1 text-sm text-ink/60">
+                    {interp(t.upload.uploading.progress, { pct: Math.round(overallProgress) })}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {uploadItems.map((item) => (
+                    <UploadProgress key={item.id} item={item} />
+                  ))}
+                </div>
+              </motion.div>
+            ) : null}
+
+            {step === "success" ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mt-8 rounded-2xl border border-accent-soft bg-white p-8 text-center shadow-sm"
+              >
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                  <CheckCircle2 className="h-9 w-9 text-green-500" />
+                </div>
+                <h1 className="font-display text-3xl text-accent-dark">{t.upload.success.title}</h1>
+                <p className="mt-2 text-ink/60">{t.upload.success.subtitle}</p>
+
+                {personalUrl ? (
+                  <div className="mt-6 flex flex-col items-center gap-3">
+                    <div className="w-full truncate rounded-xl border border-accent-soft bg-accent-soft/40 px-4 py-3 text-sm text-accent-dark">
+                      {personalUrl}
+                    </div>
+                    <div className="flex flex-wrap items-center justify-center gap-3">
+                      <CopyButton text={personalUrl} label={t.upload.success.copyLink} />
+                      <Link
+                        href={`/my/${viewerToken}`}
+                        className="inline-flex items-center gap-2 rounded-full border border-accent-light/50 bg-white px-4 py-2 text-sm font-medium text-accent-dark transition-colors hover:bg-accent-soft"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        {t.upload.success.myPhotos}
+                      </Link>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+                  <Link
+                    href="/gallery"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-dark"
+                  >
+                    {t.upload.success.backGallery}
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFiles([])
+                      setUploadItems([])
+                      setStep("select")
+                    }}
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-accent-light/50 bg-white px-6 py-3 text-sm font-medium text-accent-dark transition-colors hover:bg-accent-soft"
+                  >
+                    {t.upload.success.uploadMore}
+                  </button>
+                </div>
+              </motion.div>
+            ) : null}
+
+            {step === "identity" ? (
+              <Link
+                href="/"
+                className="mt-6 inline-flex items-center gap-1.5 text-sm text-ink/50 transition-colors hover:text-accent"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                {t.upload.identity.backHome}
+              </Link>
+            ) : null}
+          </>
+        )}
+      </main>
+    </>
+  )
+}
+
+function StepIndicator({ step }: { step: Step }) {
+  const { t } = useI18n()
+  const steps: Array<{ key: Step; label: string }> = [
+    { key: "identity", label: t.upload.steps.identity },
+    { key: "select", label: t.upload.steps.select },
+    { key: "uploading", label: t.upload.steps.uploading },
+    { key: "success", label: t.upload.steps.success },
+  ]
+  const activeIndex = steps.findIndex((s) => s.key === step)
+
+  return (
+    <div className="flex items-center justify-center gap-2">
+      {steps.map((s, i) => (
+        <div key={s.key} className="flex items-center gap-2">
+          <div className="flex flex-col items-center gap-1">
+            <div
+              className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium transition-colors ${
+                i <= activeIndex ? "bg-accent text-white" : "bg-accent-soft text-ink/40"
+              }`}
+            >
+              {i + 1}
+            </div>
+            <span
+              className={`hidden text-[0.6rem] tracking-wide uppercase sm:block ${
+                i <= activeIndex ? "text-accent" : "text-ink/30"
+              }`}
+            >
+              {s.label}
+            </span>
+          </div>
+          {i < steps.length - 1 ? (
+            <div
+              className={`mb-4 h-0.5 w-6 transition-colors sm:w-10 ${
+                i < activeIndex ? "bg-accent" : "bg-accent-soft"
+              }`}
+            />
+          ) : null}
+        </div>
+      ))}
+    </div>
+  )
+}

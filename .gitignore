@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+.next/
+dist/
+build/
+out/
+
+# Environment
+.env
+.env.local
+.env.production
+.env.*.local
+!.env.example
+
+# Database & uploads (Docker volumes — never commit)
+data/
+uploads/
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+pino-*.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# AI tooling / agent scratch
+.omc/
+.serena/
+.codegraph/
+codegraph.db
+*.codegraph
+
+# Bun
+bun.lockb
+
+# TypeScript
+*.d.ts.map
+
+# Drizzle
+drizzle/meta/
+
+# Temp
+.tmp/
+tmp/

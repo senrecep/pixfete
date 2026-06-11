@@ -1,0 +1,26 @@
+{
+  "name": "pixfete",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run --filter='*' dev",
+    "dev:api": "bun run --filter='@pixfete/api' dev",
+    "dev:web": "bun run --filter='@pixfete/web' dev",
+    "build": "bun run --filter='*' build",
+    "typecheck": "bun run --filter='*' typecheck",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "db:migrate": "bun run --filter='@pixfete/api' db:migrate",
+    "db:studio": "bun run --filter='@pixfete/api' db:studio",
+    "doctor": "npx react-doctor@latest"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "react-doctor": "^0.5.1",
+    "typescript": "^5.7.2"
+  }
+}
