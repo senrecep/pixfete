@@ -61,8 +61,10 @@
         "onlyNMore": "Sadece {n} dosya daha eklenebilir"
       },
       "uploading": {
-        "title": "Fotoğraflarınız yükleniyor…",
-        "progress": "Genel ilerleme {pct}%"
+        "title": "Dosyalarınız yükleniyor…",
+        "progress": "Genel ilerleme {pct}%",
+        "interrupted": "Bazı yüklemeler yarıda kaldı. Bu sekme açık kaldığı sürece, geri döndüğünüzde kaldığı yerden otomatik devam eder.",
+        "retry": "Tekrar dene"
       },
       "success": {
         "title": "Dosyalarınız alındı!",

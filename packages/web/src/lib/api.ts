@@ -160,15 +160,35 @@ export const api = {
         }
       }),
 
-    // Chunked upload to local storage backend with progress tracking.
-    uploadLocalChunk: (
+    // Current byte offset the server holds for a local upload, so the client
+    // can resume instead of restarting after an interruption (e.g. backgrounded
+    // tab aborting an in-flight chunk).
+    localUploadStatus: (photoId: string) =>
+      request<{ uploadedBytes: number; complete: boolean }>(`/api/upload/local/${photoId}/status`),
+
+    // Chunked upload to local storage backend with progress tracking. Resumable:
+    // it asks the server how many bytes it already has and continues from the
+    // next chunk boundary, so a retry after an interruption doesn't re-send the
+    // whole file.
+    uploadLocalChunk: async (
       photoId: string,
       file: File,
       onProgress: (p: number) => void,
-    ): Promise<void> =>
-      new Promise((resolve, reject) => {
-        const totalChunks = Math.max(1, Math.ceil(file.size / CHUNK_SIZE_BYTES))
-        let chunkIndex = 0
+    ): Promise<void> => {
+      const totalChunks = Math.max(1, Math.ceil(file.size / CHUNK_SIZE_BYTES))
+      // Resume point: bytes already stored align to chunk boundaries (an aborted
+      // request never appends), so flooring is exact. Falls back to 0 on error.
+      const status = await api.upload
+        .localUploadStatus(photoId)
+        .catch(() => ({ uploadedBytes: 0, complete: false }))
+      if (status.complete) {
+        onProgress(100)
+        return
+      }
+      const startChunk = Math.min(Math.floor(status.uploadedBytes / CHUNK_SIZE_BYTES), totalChunks)
+
+      return new Promise((resolve, reject) => {
+        let chunkIndex = startChunk
 
         const sendNext = (): void => {
           if (chunkIndex >= totalChunks) {
@@ -209,7 +229,8 @@ export const api = {
         }
 
         sendNext()
-      }),
+      })
+    },
   },
 
   photos: {

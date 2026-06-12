@@ -61,8 +61,10 @@
         "onlyNMore": "Only {n} more file(s) can be added"
       },
       "uploading": {
-        "title": "Uploading your photos…",
-        "progress": "Overall progress {pct}%"
+        "title": "Uploading your files…",
+        "progress": "Overall progress {pct}%",
+        "interrupted": "Some uploads were interrupted. As long as this tab stays open, they resume automatically from where they stopped when you return.",
+        "retry": "Try again"
       },
       "success": {
         "title": "Files received!",

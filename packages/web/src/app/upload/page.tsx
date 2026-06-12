@@ -9,9 +9,11 @@ import { DropZone } from "@/components/upload/DropZone"
 import { FilePreview } from "@/components/upload/FilePreview"
 import { type UploadItem, UploadProgress } from "@/components/upload/UploadProgress"
 import { useApiError } from "@/hooks/useApiError"
+import { useWakeLock } from "@/hooks/useWakeLock"
 import { ApiClientError, api } from "@/lib/api"
 import { SITE_URL } from "@/lib/event"
 import { interp } from "@/lib/i18n"
+import type { PreparedUpload } from "@/lib/types"
 import { formatBytes, readMediaDimensions } from "@/lib/utils"
 import { useEvent } from "@/providers/EventProvider"
 import { useI18n } from "@/providers/I18nProvider"
@@ -21,9 +23,9 @@ import {
   CreateUploadSessionSchema,
 } from "@pixfete/shared"
 import { motion } from "framer-motion"
-import { ArrowLeft, CheckCircle2, ExternalLink, UploadCloud } from "lucide-react"
+import { ArrowLeft, CheckCircle2, ExternalLink, RefreshCw, UploadCloud } from "lucide-react"
 import Link from "next/link"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 
 const ALLOWED = new Set<string>(ALLOWED_MIME_TYPES)
@@ -79,6 +81,20 @@ export default function UploadPage() {
 
   const [files, setFiles] = useState<SelectedFile[]>([])
   const [uploadItems, setUploadItems] = useState<UploadItem[]>([])
+
+  // Upload plan + completion set live in refs so the visibility handler can
+  // re-drive uploads after an interruption without stale closures.
+  const uploadPlanRef = useRef<Array<{ prepared: PreparedUpload; sf: SelectedFile }>>([])
+  const doneRef = useRef<Set<string>>(new Set())
+  const runningRef = useRef(false)
+  const resumeRequestedRef = useRef(false)
+  // Prevents a double-tap on the upload button from kicking off two prepare
+  // calls (which would create duplicate photo rows) before the step re-renders.
+  const submittingRef = useRef(false)
+
+  // Keep the screen awake during uploads — large videos can take minutes and
+  // a dimming/locking phone otherwise throttles or interrupts the transfer.
+  useWakeLock(step === "uploading")
 
   const validFiles = useMemo(() => files.filter((f) => !f.error), [files])
   const remaining = maxFiles - files.length
@@ -192,9 +208,76 @@ export default function UploadPage() {
     setFiles((prev) => prev.filter((f) => f.id !== id))
   }
 
+  const patchItem = useCallback((id: string, patch: Partial<UploadItem>) => {
+    setUploadItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)))
+  }, [])
+
+  // Uploads a single file and marks it done. Never throws — failures land as the
+  // item's "error" status so a later retry/resume can pick it up.
+  const uploadOne = useCallback(
+    async ({ prepared, sf }: { prepared: PreparedUpload; sf: SelectedFile }) => {
+      patchItem(sf.id, { status: "uploading", error: undefined })
+      try {
+        let driveFileId: string | undefined
+        if (prepared.uploadUrl) {
+          const responseBody = await api.upload.uploadToStorage(
+            prepared.uploadUrl,
+            prepared.uploadMethod,
+            sf.file,
+            (p) => patchItem(sf.id, { progress: p }),
+            prepared.headers,
+            prepared.fields,
+          )
+          driveFileId = extractDriveFileId(responseBody)
+        } else {
+          // Local uploads resume from the server's stored byte offset, so a
+          // retry after an interruption continues instead of restarting.
+          await api.upload.uploadLocalChunk(prepared.photoId, sf.file, (p) =>
+            patchItem(sf.id, { progress: p }),
+          )
+        }
+        await api.upload.complete(prepared.photoId, driveFileId)
+        doneRef.current.add(sf.id)
+        patchItem(sf.id, { status: "done", progress: 100 })
+      } catch (err) {
+        patchItem(sf.id, { status: "error", error: getErrorMessage(err) })
+      }
+    },
+    [getErrorMessage, patchItem],
+  )
+
+  // Drives all not-yet-done items concurrently. Safe to call repeatedly (e.g. on
+  // a manual retry or when the tab returns to the foreground); a single-flight
+  // guard plus a resume-requested flag coalesce overlapping triggers.
+  const runUploads = useCallback(async () => {
+    if (runningRef.current) {
+      resumeRequestedRef.current = true
+      return
+    }
+    runningRef.current = true
+    const allDone = () => uploadPlanRef.current.every((p) => doneRef.current.has(p.sf.id))
+    do {
+      resumeRequestedRef.current = false
+      const pending = uploadPlanRef.current.filter((p) => !doneRef.current.has(p.sf.id))
+      await Promise.all(pending.map(uploadOne))
+    } while (
+      resumeRequestedRef.current &&
+      typeof document !== "undefined" &&
+      document.visibilityState === "visible" &&
+      !allDone()
+    )
+    runningRef.current = false
+    if (uploadPlanRef.current.length > 0 && allDone()) {
+      setStep("success")
+    }
+  }, [uploadOne])
+
   const startUpload = async () => {
-    if (!sessionId || validFiles.length === 0) return
+    if (!sessionId || validFiles.length === 0 || submittingRef.current) return
+    submittingRef.current = true
     setStep("uploading")
+    doneRef.current = new Set()
+    uploadPlanRef.current = []
 
     const withDims = await Promise.all(
       validFiles.map(async (sf) => ({
@@ -224,44 +307,19 @@ export default function UploadPage() {
         })),
       })
 
-      await Promise.all(
-        prepareRes.uploads.map(async (prepared, i) => {
+      uploadPlanRef.current = prepareRes.uploads
+        .map((prepared, i) => {
           const entry = withDims[i]
-          if (!entry) return
-          const { sf } = entry
-          const updateItem = (patch: Partial<UploadItem>) =>
-            setUploadItems((prev) => prev.map((it) => (it.id === sf.id ? { ...it, ...patch } : it)))
+          return entry ? { prepared, sf: entry.sf } : null
+        })
+        .filter((p): p is { prepared: PreparedUpload; sf: SelectedFile } => p !== null)
 
-          updateItem({ status: "uploading" })
-          try {
-            let driveFileId: string | undefined
-            if (prepared.uploadUrl) {
-              const responseBody = await api.upload.uploadToStorage(
-                prepared.uploadUrl,
-                prepared.uploadMethod,
-                sf.file,
-                (p) => updateItem({ progress: p }),
-                prepared.headers,
-                prepared.fields,
-              )
-              // GDrive's resumable endpoint returns the created file's metadata;
-              // capture its `id` so the API can persist the real storage key.
-              driveFileId = extractDriveFileId(responseBody)
-            } else {
-              await api.upload.uploadLocalChunk(prepared.photoId, sf.file, (p) =>
-                updateItem({ progress: p }),
-              )
-            }
-            await api.upload.complete(prepared.photoId, driveFileId)
-            updateItem({ status: "done", progress: 100 })
-          } catch (err) {
-            updateItem({ status: "error", error: getErrorMessage(err) })
-          }
-        }),
-      )
-
-      setStep("success")
+      // Prepared and now in the "uploading" step (button unmounted), so further
+      // starts can only come from a later "upload more" — release the guard.
+      submittingRef.current = false
+      await runUploads()
     } catch (err) {
+      submittingRef.current = false
       toast.error(
         err instanceof ApiClientError ? getErrorMessage(err) : t.upload.prepareFailedError,
       )
@@ -269,6 +327,18 @@ export default function UploadPage() {
     }
   }
 
+  // When the tab returns to the foreground mid-upload, resume anything that was
+  // interrupted (the browser aborts in-flight requests while backgrounded).
+  useEffect(() => {
+    if (step !== "uploading") return
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void runUploads()
+    }
+    document.addEventListener("visibilitychange", onVisible)
+    return () => document.removeEventListener("visibilitychange", onVisible)
+  }, [step, runUploads])
+
+  const hasUploadErrors = uploadItems.some((it) => it.status === "error")
   const personalUrl = viewerToken ? `${SITE_URL}/my/${viewerToken}` : ""
 
   return (
@@ -432,6 +502,16 @@ export default function UploadPage() {
                     <UploadProgress key={item.id} item={item} />
                   ))}
                 </div>
+
+                {hasUploadErrors ? (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center">
+                    <p className="text-sm text-amber-700">{t.upload.uploading.interrupted}</p>
+                    <Button variant="secondary" onClick={() => void runUploads()} className="mt-3">
+                      <RefreshCw className="h-4 w-4" />
+                      {t.upload.uploading.retry}
+                    </Button>
+                  </div>
+                ) : null}
               </motion.div>
             ) : null}
 

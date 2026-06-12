@@ -11,7 +11,7 @@ export interface UploadItem {
   fileName: string
   progress: number
   status: UploadItemStatus
-  error?: string
+  error?: string | undefined
 }
 
 export function UploadProgress({ item }: { item: UploadItem }) {

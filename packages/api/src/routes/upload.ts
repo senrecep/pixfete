@@ -348,6 +348,28 @@ export const uploadRoutes = new Elysia({ prefix: "/api/upload" })
     return { success: true, received: chunkIndex + 1, total: totalChunks, complete: isLast }
   })
 
+  // ── Local upload resume status ────────────────────────────────────────────────
+  // Reports how many bytes the server already holds for a local upload so the
+  // client can resume from there (e.g. after the tab was backgrounded and an
+  // in-flight chunk was aborted) instead of re-sending the whole file.
+  .get("/local/:photoId/status", async ({ params, set }) => {
+    if (getStorageAdapter().provider !== "local") {
+      return { uploadedBytes: 0, complete: false }
+    }
+    const rows = db.select().from(photos).where(eq(photos.id, params.photoId)).limit(1).all()
+    const photo = rows[0]
+    if (!photo) {
+      set.status = 404
+      return errorBody(PixfeteErr.photoNotFound())
+    }
+    if (photo.uploadComplete) {
+      return { uploadedBytes: photo.originalSize, complete: true }
+    }
+    const target = localPath(photo.storageKey)
+    const info = target ? await stat(target).catch(() => null) : null
+    return { uploadedBytes: info?.size ?? 0, complete: false }
+  })
+
 // ── Serve local files (GET /api/uploads/*) ────────────────────────────────────
 export const uploadsServeRoutes = new Elysia().get(
   "/api/uploads/*",
