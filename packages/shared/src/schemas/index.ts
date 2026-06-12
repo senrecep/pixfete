@@ -94,6 +94,9 @@ export const EventConfigSchema = z.object({
   venueName: z.string().max(200),
   venueAddress: z.string().max(300),
   venueMapsUrl: z.string().max(500),
+  // Optional event WhatsApp number (organizer). When set, guests get a
+  // "send via WhatsApp" fallback. Free-form (digits/spaces/+); sanitized client-side.
+  whatsappNumber: z.string().max(32),
   // Optional pinned coordinates (from location search or manual entry).
   lat: z.number().min(-90).max(90).nullable(),
   lng: z.number().min(-180).max(180).nullable(),
@@ -172,6 +175,7 @@ export const DEFAULT_SETTINGS: AppSettingsInput = {
     venueName: "",
     venueAddress: "",
     venueMapsUrl: "",
+    whatsappNumber: "",
     lat: null,
     lng: null,
     hostsLeft: "",

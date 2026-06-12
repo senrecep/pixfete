@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui/Spinner"
 import { DropZone } from "@/components/upload/DropZone"
 import { FilePreview } from "@/components/upload/FilePreview"
 import { type UploadItem, UploadProgress } from "@/components/upload/UploadProgress"
+import { WhatsAppSendHelper } from "@/components/whatsapp/WhatsAppSendHelper"
 import { useApiError } from "@/hooks/useApiError"
 import { useWakeLock } from "@/hooks/useWakeLock"
 import { ApiClientError, api } from "@/lib/api"
@@ -62,7 +63,7 @@ function getValidationCode(file: File, maxFileSize: number): string | undefined 
 
 export default function UploadPage() {
   const { t, te } = useI18n()
-  const { features, upload } = useEvent()
+  const { event, features, upload } = useEvent()
   const { getErrorMessage } = useApiError()
 
   const maxFiles = upload.maxFilesPerSession
@@ -565,6 +566,14 @@ export default function UploadPage() {
                   </button>
                 </div>
               </motion.div>
+            ) : null}
+
+            {event.whatsappNumber && step !== "identity" ? (
+              <WhatsAppSendHelper
+                number={event.whatsappNumber}
+                uploaderName={name}
+                className="mt-6"
+              />
             ) : null}
 
             {step === "identity" ? (

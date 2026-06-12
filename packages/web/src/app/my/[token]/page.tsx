@@ -7,12 +7,14 @@ import { Badge } from "@/components/ui/Badge"
 import { CopyButton } from "@/components/ui/CopyButton"
 import { MediaThumb } from "@/components/ui/MediaThumb"
 import { Spinner } from "@/components/ui/Spinner"
+import { WhatsAppSendHelper } from "@/components/whatsapp/WhatsAppSendHelper"
 import { useApiError } from "@/hooks/useApiError"
 import { api } from "@/lib/api"
 import { SITE_URL } from "@/lib/event"
 import { photoSrc } from "@/lib/photo"
 import type { Photo } from "@/lib/types"
 import { formatBytes } from "@/lib/utils"
+import { useEvent } from "@/providers/EventProvider"
 import { useI18n } from "@/providers/I18nProvider"
 import type { PhotoStatus } from "@pixfete/shared"
 import { format } from "date-fns"
@@ -28,6 +30,7 @@ export default function MyPhotosPage({
 }) {
   const { token } = use(params)
   const { t } = useI18n()
+  const { event } = useEvent()
   const { getErrorMessage } = useApiError()
 
   const [uploaderName, setUploaderName] = useState("")
@@ -106,6 +109,14 @@ export default function MyPhotosPage({
             <CopyButton text={personalUrl} label={t.myPhotos.copyLink} />
           </div>
         </div>
+
+        {event.whatsappNumber ? (
+          <WhatsAppSendHelper
+            number={event.whatsappNumber}
+            uploaderName={uploaderName}
+            className="mb-10"
+          />
+        ) : null}
 
         {loading ? (
           <div className="flex justify-center py-20">

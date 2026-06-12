@@ -61,6 +61,7 @@ export interface EventConfig {
   venueName: string
   venueAddress: string
   venueMapsUrl: string
+  whatsappNumber: string
   lat: number | null
   lng: number | null
   hostsLeft: string

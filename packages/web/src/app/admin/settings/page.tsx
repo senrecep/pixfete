@@ -226,6 +226,16 @@ export default function SettingsPage() {
                 setForm({ ...form, event: { ...form.event, venueAddress: e.target.value } })
               }
             />
+            <Input
+              label={s.event.whatsappNumber}
+              hint={s.event.whatsappNumberHint}
+              inputMode="tel"
+              placeholder="+90 5XX XXX XX XX"
+              value={form.event.whatsappNumber}
+              onChange={(e) =>
+                setForm({ ...form, event: { ...form.event, whatsappNumber: e.target.value } })
+              }
+            />
             <LocationPicker
               value={{
                 lat: form.event.lat,

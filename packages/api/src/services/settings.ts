@@ -78,6 +78,7 @@ function envSeed(): AppSettingsInput {
       venueName: envStr("EVENT_VENUE_NAME", d.event.venueName),
       venueAddress: envStr("EVENT_VENUE_ADDRESS", d.event.venueAddress),
       venueMapsUrl: envStr("EVENT_VENUE_MAPS_URL", d.event.venueMapsUrl),
+      whatsappNumber: envStr("EVENT_WHATSAPP_NUMBER", d.event.whatsappNumber),
       lat: d.event.lat,
       lng: d.event.lng,
       hostsLeft: envStr("EVENT_HOSTS_LEFT", d.event.hostsLeft),

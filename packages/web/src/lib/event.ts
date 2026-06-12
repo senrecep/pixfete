@@ -10,6 +10,7 @@ export const DEFAULT_EVENT: EventConfig = {
   venueName: "",
   venueAddress: "",
   venueMapsUrl: "",
+  whatsappNumber: "",
   lat: null,
   lng: null,
   hostsLeft: "",

@@ -5,6 +5,27 @@
       "unavailableUploaded": "Bu dosya tarayıcınızda önizlenemiyor ama başarıyla yüklendi.",
       "unavailableLocal": "Bu dosya tarayıcınızda önizlenemiyor — yine de yüklenebilir."
     },
+    "whatsapp": {
+      "title": "Yükleyemiyor musunuz? WhatsApp ile gönderin",
+      "desc": "Fotoğraf veya videolarınızı doğrudan WhatsApp üzerinden de iletebilirsiniz.",
+      "howToTitle": "En yüksek kalitede nasıl gönderilir?",
+      "iosTitle": "iPhone (iOS)",
+      "iosSteps": [
+        "WhatsApp sohbetini açıp ataç (+) simgesine dokunun.",
+        "Orijinal kalite için \"Belge\"yi seçip dosyayı gönderin (sıkıştırma olmaz).",
+        "Alternatif: \"Fotoğraf/Video\"yu seçin, göndermeden önce üstteki \"HD\" düğmesine dokunup \"HD Kalite\"yi işaretleyin."
+      ],
+      "androidTitle": "Android",
+      "androidSteps": [
+        "WhatsApp sohbetinde ataç (📎) simgesine dokunun.",
+        "Orijinal kalite için \"Belge\"yi seçip dosyayı gönderin (sıkıştırma olmaz).",
+        "Alternatif: \"Galeri\"den seçin, göndermeden önce \"HD\" düğmesine dokunup \"HD kalite\"yi seçin."
+      ],
+      "note": "Dosyayı \"Belge\" olarak göndermek WhatsApp sıkıştırmasını tamamen önler ve orijinal kaliteyi korur.",
+      "sendButton": "WhatsApp ile gönder",
+      "prefill": "Merhaba! Ben {name}. Fotoğraf/videolarımı paylaşmak istiyorum 📸",
+      "prefillNoName": "Merhaba! Fotoğraf/videolarımı paylaşmak istiyorum 📸"
+    },
     "nav": {
       "home": "Ana Sayfa",
       "gallery": "Galeri",
@@ -187,6 +208,8 @@
           "minute": "Dakika",
           "venueName": "Mekan Adı",
           "venueAddress": "Mekan Adresi",
+          "whatsappNumber": "WhatsApp Numarası (opsiyonel)",
+          "whatsappNumberHint": "Yükleme başarısız olursa misafirlere 'WhatsApp ile gönder' alternatifi olarak gösterilir. Gizlemek için boş bırakın.",
           "venueMapsUrl": "Harita URL",
           "hostsLeft": "Ev sahibi / Aile (sol)",
           "hostsRight": "Ev sahibi / Aile (sağ)",

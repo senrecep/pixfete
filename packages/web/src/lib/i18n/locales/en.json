@@ -5,6 +5,27 @@
       "unavailableUploaded": "This file can't be previewed in your browser, but it was uploaded successfully.",
       "unavailableLocal": "This file can't be previewed in your browser — it can still be uploaded."
     },
+    "whatsapp": {
+      "title": "Trouble uploading? Send via WhatsApp",
+      "desc": "You can also send your photos or videos straight to us on WhatsApp.",
+      "howToTitle": "How to send in the highest quality",
+      "iosTitle": "iPhone (iOS)",
+      "iosSteps": [
+        "Open the WhatsApp chat and tap the attach (+) icon.",
+        "For original quality, choose \"Document\" and send the file (no compression).",
+        "Or pick \"Photo/Video\", then tap the \"HD\" button at the top and choose \"HD Quality\" before sending."
+      ],
+      "androidTitle": "Android",
+      "androidSteps": [
+        "In the WhatsApp chat, tap the attach (📎) icon.",
+        "For original quality, choose \"Document\" and send the file (no compression).",
+        "Or pick from \"Gallery\", then tap the \"HD\" button and choose \"HD quality\" before sending."
+      ],
+      "note": "Sending as a \"Document\" fully avoids WhatsApp's compression and keeps the original quality.",
+      "sendButton": "Send via WhatsApp",
+      "prefill": "Hi! It's {name}. I'd like to share my photos/videos 📸",
+      "prefillNoName": "Hi! I'd like to share my photos/videos 📸"
+    },
     "nav": {
       "home": "Home",
       "gallery": "Gallery",
@@ -187,6 +208,8 @@
           "minute": "Minute",
           "venueName": "Venue Name",
           "venueAddress": "Venue Address",
+          "whatsappNumber": "WhatsApp Number (optional)",
+          "whatsappNumberHint": "Shown to guests as a \"send via WhatsApp\" fallback if uploading fails. Leave empty to hide.",
           "venueMapsUrl": "Maps URL",
           "hostsLeft": "Host / Family (left)",
           "hostsRight": "Host / Family (right)",
