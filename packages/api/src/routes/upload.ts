@@ -6,9 +6,10 @@ import {
   MAX_FILE_SIZE_BYTES,
   PixfeteErr,
   PrepareUploadSchema,
+  isVideoMime,
 } from "@pixfete/shared"
 import type { AllowedMimeType } from "@pixfete/shared"
-import { and, eq } from "drizzle-orm"
+import { and, eq, or } from "drizzle-orm"
 import { Elysia } from "elysia"
 import { Result as R } from "tsentials/result"
 import { track } from "../analytics"
@@ -21,6 +22,7 @@ import { resolveAdminSessionId } from "../middleware/auth"
 import { detectMimeFromBytes } from "../middleware/magicBytes"
 import { createRateLimiter } from "../middleware/rateLimit"
 import { getSettings } from "../services/settings"
+import { enqueueTranscode } from "../services/transcode"
 import { getStorageAdapter } from "../storage"
 import { clientIp, generatePhotoId, generateViewerToken, userAgent } from "../util"
 
@@ -270,6 +272,12 @@ export const uploadRoutes = new Elysia({ prefix: "/api/upload" })
 
     db.update(photos).set({ uploadComplete: true }).where(eq(photos.id, photoId)).run()
 
+    // Local videos: kick off a background transcode to a cross-browser H.264
+    // mp4 + poster (HEVC/.mov otherwise only plays in Safari). Fire-and-forget.
+    if (storageAdapter.provider === "local" && isVideoMime(photo.mimeType)) {
+      enqueueTranscode(photoId)
+    }
+
     const ip = clientIp(headers, server?.requestIP(request)?.address)
     track({
       eventType: "upload_complete",
@@ -393,13 +401,34 @@ export const uploadsServeRoutes = new Elysia().get(
       return errorBody(PixfeteErr.photoNotFound())
     }
 
-    // Look up directly by storageKey — avoids fragile path-splitting hacks
-    const rows = db.select().from(photos).where(eq(photos.storageKey, storageKey)).limit(1).all()
+    // Look up by any of the photo's stored keys — original, or the derived
+    // transcoded mp4 / poster — so derived files inherit the same auth.
+    const rows = db
+      .select()
+      .from(photos)
+      .where(
+        or(
+          eq(photos.storageKey, storageKey),
+          eq(photos.transcodedKey, storageKey),
+          eq(photos.posterKey, storageKey),
+        ),
+      )
+      .limit(1)
+      .all()
     const photo = rows[0]
     if (!photo) {
       set.status = 404
       return errorBody(PixfeteErr.photoNotFound())
     }
+
+    // Content type follows which key was requested (derived files differ from
+    // the original's mime).
+    const servedContentType =
+      storageKey === photo.transcodedKey
+        ? "video/mp4"
+        : storageKey === photo.posterKey
+          ? "image/jpeg"
+          : photo.mimeType
 
     // Auth: approved = public; pending/rejected = owner viewer token OR admin.
     const viewerToken = (query as Record<string, string | undefined>).token
@@ -439,7 +468,7 @@ export const uploadsServeRoutes = new Elysia().get(
       }
       return new Response(fetched.value.body, {
         headers: {
-          "Content-Type": photo.mimeType,
+          "Content-Type": servedContentType,
           "Cache-Control": "private, max-age=3600",
           "X-Robots-Tag": "noindex, noimageindex",
         },
@@ -461,7 +490,7 @@ export const uploadsServeRoutes = new Elysia().get(
       return errorBody(PixfeteErr.photoNotFound())
     }
 
-    set.headers["Content-Type"] = photo.mimeType
+    set.headers["Content-Type"] = servedContentType
     return Bun.file(absolute)
   },
 )

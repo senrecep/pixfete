@@ -305,10 +305,14 @@ export const adminRoutes = new Elysia({ prefix: "/api/admin" })
         return respond(R.failure(PixfeteErr.photoNotFound()), set)
       }
 
-      const deleted = await getStorageAdapter().deleteFile(photo.storageKey)
+      const adapter = getStorageAdapter()
+      const deleted = await adapter.deleteFile(photo.storageKey)
       if (R.isFailure(deleted)) {
         logger.warn({ photoId: params.id }, "storage delete failed; removing DB record anyway")
       }
+      // Best-effort cleanup of derived transcode artifacts (local only).
+      if (photo.transcodedKey) await adapter.deleteFile(photo.transcodedKey)
+      if (photo.posterKey) await adapter.deleteFile(photo.posterKey)
 
       db.delete(photos).where(eq(photos.id, params.id)).run()
       return { success: true }

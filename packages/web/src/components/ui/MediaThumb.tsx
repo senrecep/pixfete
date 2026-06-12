@@ -1,6 +1,6 @@
 "use client"
 
-import { isVideo, mediaFormatLabel } from "@/lib/photo"
+import { isVideo, mediaFormatLabel, posterSrc, videoSrc } from "@/lib/photo"
 import type { Photo } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useI18n } from "@/providers/I18nProvider"
@@ -13,6 +13,8 @@ interface MediaThumbProps {
   src: string
   photo: Photo
   alt: string
+  /** Viewer token, so derived (transcoded/poster) URLs stay authenticated. */
+  token?: string | undefined
   /** Extra classes for the media element (e.g. hover scale). */
   mediaClassName?: string
   /** Centered play badge size for videos. */
@@ -33,6 +35,7 @@ export function MediaThumb({
   src,
   photo,
   alt,
+  token,
   mediaClassName,
   badge = "md",
   fallbackLabel,
@@ -42,6 +45,10 @@ export function MediaThumb({
   const [loaded, setLoaded] = useState(false)
   const [failed, setFailed] = useState(false)
   const video = isVideo(photo)
+  // Once transcoded, a poster image is the most reliable thumbnail (decodes in
+  // every browser); otherwise fall back to a muted <video> first-frame.
+  const poster = video ? posterSrc(photo, token) : null
+  const resolvedVideoSrc = video ? (videoSrc(photo, token) ?? src) : src
 
   if (failed) {
     return (
@@ -62,9 +69,9 @@ export function MediaThumb({
   return (
     <>
       {loaded ? null : <div className="skeleton absolute inset-0" />}
-      {video ? (
+      {video && !poster ? (
         <video
-          src={src}
+          src={resolvedVideoSrc}
           muted
           playsInline
           preload="metadata"
@@ -78,7 +85,7 @@ export function MediaThumb({
         </video>
       ) : (
         <img
-          src={src}
+          src={poster ?? src}
           alt={alt}
           loading="lazy"
           decoding="async"

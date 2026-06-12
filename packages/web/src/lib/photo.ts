@@ -56,3 +56,23 @@ export function photoSrc(photo: Photo, viewerToken?: string): string | null {
 
   return photo.publicUrl ? `${API_URL}${photo.publicUrl}` : null
 }
+
+/** Builds an authenticated proxy URL for a derived (local-only) storage key. */
+function proxyUrl(key: string, viewerToken?: string): string {
+  const url = `${API_URL}/api/uploads/${key}`
+  return viewerToken ? `${url}?token=${encodeURIComponent(viewerToken)}` : url
+}
+
+/**
+ * Best playable source for a video: the transcoded H.264 mp4 when it's ready
+ * (plays in every browser), otherwise the original upload.
+ */
+export function videoSrc(photo: Photo, viewerToken?: string): string | null {
+  if (photo.transcodedKey) return proxyUrl(photo.transcodedKey, viewerToken)
+  return photoSrc(photo, viewerToken)
+}
+
+/** Poster frame for a video, once transcoded; null otherwise. */
+export function posterSrc(photo: Photo, viewerToken?: string): string | null {
+  return photo.posterKey ? proxyUrl(photo.posterKey, viewerToken) : null
+}

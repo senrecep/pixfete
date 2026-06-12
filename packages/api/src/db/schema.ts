@@ -25,6 +25,10 @@ export const photos = sqliteTable("photos", {
   mimeType: text("mime_type").notNull(),
   width: integer("width"),
   height: integer("height"),
+  // Derived (local-only) web-friendly H.264 mp4 + JPEG poster, produced by the
+  // background transcode job for HEVC/.mov videos. Null until/unless transcoded.
+  transcodedKey: text("transcoded_key"),
+  posterKey: text("poster_key"),
   uploadedAt: integer("uploaded_at").notNull(),
   approvedAt: integer("approved_at"),
   rejectedAt: integer("rejected_at"),

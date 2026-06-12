@@ -21,6 +21,8 @@ export function toPhoto(
     mimeType: row.mimeType,
     width: row.width ?? null,
     height: row.height ?? null,
+    transcodedKey: row.transcodedKey ?? null,
+    posterKey: row.posterKey ?? null,
     uploadedAt: row.uploadedAt,
     approvedAt: row.approvedAt ?? null,
     rejectedAt: row.rejectedAt ?? null,

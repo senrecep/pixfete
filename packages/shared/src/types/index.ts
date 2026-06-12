@@ -15,6 +15,10 @@ export interface Photo {
   mimeType: string
   width: number | null
   height: number | null
+  /** Local-only derived H.264 mp4 for cross-browser playback (null until transcoded). */
+  transcodedKey: string | null
+  /** Local-only derived JPEG poster frame (null until transcoded). */
+  posterKey: string | null
   uploadedAt: number
   approvedAt: number | null
   rejectedAt: number | null

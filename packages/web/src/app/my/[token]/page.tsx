@@ -170,6 +170,7 @@ export default function MyPhotosPage({
                                   src={src}
                                   photo={photo}
                                   alt={photo.fileName}
+                                  token={token}
                                   badge="sm"
                                   fallbackLabel={t.media.unavailableUploaded}
                                 />

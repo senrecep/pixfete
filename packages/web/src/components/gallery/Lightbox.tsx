@@ -3,7 +3,7 @@
 import { MediaFallback } from "@/components/ui/MediaFallback"
 import { useEventCopy } from "@/hooks/useEventCopy"
 import { interp } from "@/lib/i18n"
-import { isVideo, mediaFormatLabel, photoSrc } from "@/lib/photo"
+import { isVideo, mediaFormatLabel, photoSrc, posterSrc, videoSrc } from "@/lib/photo"
 import type { Photo } from "@/lib/types"
 import { useI18n } from "@/providers/I18nProvider"
 import { AnimatePresence, motion } from "framer-motion"
@@ -113,6 +113,7 @@ export function Lightbox({ photos, index, onClose, onNavigate, viewerToken }: Li
               key={current.id}
               photo={current}
               src={photoSrc(current, viewerToken) ?? undefined}
+              viewerToken={viewerToken}
               alt={interp(copy.photoAlt, { name: current.uploaderName })}
             />
             <p className="mt-4 font-display text-xl text-white/90">{current.uploaderName}</p>
@@ -142,21 +143,25 @@ export function Lightbox({ photos, index, onClose, onNavigate, viewerToken }: Li
 function LightboxMedia({
   photo,
   src,
+  viewerToken,
   alt,
 }: {
   photo: Photo
   src: string | undefined
+  viewerToken?: string | undefined
   alt: string
 }) {
   const { t } = useI18n()
   const [failed, setFailed] = useState(false)
+  // Prefer the transcoded mp4 for video so it plays cross-browser.
+  const playableSrc = isVideo(photo) ? (videoSrc(photo, viewerToken) ?? src) : src
 
-  if (!src || failed) {
+  if (!playableSrc || failed) {
     return (
       <div className="flex h-[55dvh] w-[85vw] max-w-md items-center justify-center overflow-hidden rounded-lg">
         <MediaFallback
           label={t.media.unavailable}
-          format={src ? mediaFormatLabel(photo.fileName, photo.mimeType) : undefined}
+          format={playableSrc ? mediaFormatLabel(photo.fileName, photo.mimeType) : undefined}
         />
       </div>
     )
@@ -164,7 +169,8 @@ function LightboxMedia({
 
   return isVideo(photo) ? (
     <video
-      src={src}
+      src={playableSrc}
+      poster={posterSrc(photo, viewerToken) ?? undefined}
       controls
       autoPlay
       playsInline

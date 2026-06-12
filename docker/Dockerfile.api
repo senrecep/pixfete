@@ -21,6 +21,8 @@ COPY packages/api ./packages/api
 COPY tsconfig.base.json ./
 
 FROM base AS runner
+# ffmpeg (+ ffprobe) powers background video transcoding (HEVC/.mov -> H.264 mp4).
+RUN apk add --no-cache ffmpeg
 RUN addgroup --system --gid 1001 pixfete && \
     adduser --system --uid 1001 pixfete
 RUN mkdir -p /app/data /app/uploads && chown -R pixfete:pixfete /app
