@@ -443,7 +443,7 @@
   },
   "errors": {
     "Upload.FileTooLarge": "Dosya çok büyük (max {max}MB).",
-    "Upload.InvalidMimeType": "Desteklenmeyen dosya türü. JPEG, PNG, WebP, HEIC veya TIFF kullanın.",
+    "Upload.InvalidMimeType": "Desteklenmeyen dosya türü. Fotoğraf (JPEG, PNG, WebP, HEIC, TIFF) veya video (MP4, MOV, WebM) kullanın.",
     "Upload.SessionNotFound": "Oturum bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.",
     "Upload.SessionExpired": "Oturumunuz sona erdi. Lütfen baştan başlayın.",
     "Upload.TooManyFiles": "Oturum başına en fazla {max} dosya yükleyebilirsiniz.",

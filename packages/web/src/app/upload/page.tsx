@@ -175,7 +175,11 @@ export default function UploadPage() {
       }
       const accepted = incoming.slice(0, space).map<SelectedFile>((file) => {
         const errCode = getValidationCode(file, maxFileSize)
-        return { id: makeId(), file, error: errCode ? te(errCode) : undefined }
+        return {
+          id: makeId(),
+          file,
+          error: errCode ? te(errCode, { max: upload.maxFileSizeMb }) : undefined,
+        }
       })
       if (incoming.length > space) {
         toast.error(interp(t.upload.select.onlyNMore, { n: space }))

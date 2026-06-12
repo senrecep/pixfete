@@ -443,7 +443,7 @@
   },
   "errors": {
     "Upload.FileTooLarge": "File is too large (max {max}MB).",
-    "Upload.InvalidMimeType": "Unsupported file type. Use JPEG, PNG, WebP, HEIC or TIFF.",
+    "Upload.InvalidMimeType": "Unsupported file type. Use a photo (JPEG, PNG, WebP, HEIC, TIFF) or video (MP4, MOV, WebM).",
     "Upload.SessionNotFound": "Session not found. Please refresh and try again.",
     "Upload.SessionExpired": "Your session has expired. Please start over.",
     "Upload.TooManyFiles": "Maximum {max} files per session.",
