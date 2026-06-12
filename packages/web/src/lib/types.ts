@@ -19,6 +19,7 @@ export type {
   Photo,
   PhotoStatus,
   PublicSettings,
+  PublicUploadLimits,
   StorageProvider,
   UpdateSettingsInput,
   UploadSession,

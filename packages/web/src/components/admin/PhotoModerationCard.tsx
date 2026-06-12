@@ -1,6 +1,7 @@
 "use client"
 
 import { Badge } from "@/components/ui/Badge"
+import { MediaThumb } from "@/components/ui/MediaThumb"
 import { interp } from "@/lib/i18n"
 import { photoSrc } from "@/lib/photo"
 import type { Photo } from "@/lib/types"
@@ -46,15 +47,13 @@ export function PhotoModerationCard({
           <button
             type="button"
             onClick={onOpen}
-            className="h-full w-full cursor-zoom-in"
+            className="relative h-full w-full cursor-zoom-in"
             aria-label={interp(c.expandPhoto, { name: photo.uploaderName })}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <MediaThumb
               src={src}
+              photo={photo}
               alt={interp(c.photoAlt, { name: photo.uploaderName })}
-              loading="lazy"
-              className="h-full w-full object-cover"
             />
           </button>
         ) : (

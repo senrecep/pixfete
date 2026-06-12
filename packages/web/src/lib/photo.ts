@@ -1,6 +1,26 @@
+import { isVideoMime } from "@pixfete/shared"
 import type { Photo } from "./types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"
+
+/** True when a media record is actually a video (uploaded as photo-or-video). */
+export function isVideo(photo: Photo): boolean {
+  return isVideoMime(photo.mimeType)
+}
+
+/**
+ * A short, human-friendly format badge for a media item — used in the
+ * "preview unavailable" fallback so the user knows what they're dealing with
+ * (e.g. HEIC, MOV). Prefers the filename extension, falls back to the MIME
+ * subtype.
+ */
+export function mediaFormatLabel(fileName: string, mimeType: string): string {
+  const dot = fileName.lastIndexOf(".")
+  const ext = dot >= 0 ? fileName.slice(dot + 1) : ""
+  if (ext.length >= 2 && ext.length <= 5) return ext.toUpperCase()
+  const sub = mimeType.split("/")[1] ?? ""
+  return sub.toUpperCase()
+}
 
 /**
  * Resolves a displayable absolute image URL for a photo, or `null` when none is
@@ -27,10 +47,9 @@ export function photoSrc(photo: Photo, viewerToken?: string): string | null {
   // or admin cookie, for pending/rejected ones. GDrive files are private (Shared
   // Drive), so they are never publicly reachable and must use this path.
   if (photo.storageType === "local" || photo.storageType === "gdrive") {
-    const path =
-      photo.publicUrl && photo.publicUrl.startsWith("/")
-        ? photo.publicUrl
-        : `/api/uploads/${photo.storageKey}`
+    const path = photo.publicUrl?.startsWith("/")
+      ? photo.publicUrl
+      : `/api/uploads/${photo.storageKey}`
     const url = `${API_URL}${path}`
     return viewerToken ? `${url}?token=${encodeURIComponent(viewerToken)}` : url
   }

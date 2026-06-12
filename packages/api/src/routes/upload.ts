@@ -63,6 +63,7 @@ export const uploadRoutes = new Elysia({ prefix: "/api/upload" })
         id: sessionId,
         uploaderName: parsed.data.uploaderName,
         uploaderPhone: parsed.data.uploaderPhone ?? null,
+        uploaderNote: parsed.data.uploaderNote ?? null,
         viewerToken,
         ipAddress: ip,
         userAgent: ua,

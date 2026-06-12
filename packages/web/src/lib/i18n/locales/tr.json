@@ -1,15 +1,20 @@
 {
   "strings": {
+    "media": {
+      "unavailable": "Bu dosya tarayıcınızda önizlenemiyor.",
+      "unavailableUploaded": "Bu dosya tarayıcınızda önizlenemiyor ama başarıyla yüklendi.",
+      "unavailableLocal": "Bu dosya tarayıcınızda önizlenemiyor — yine de yüklenebilir."
+    },
     "nav": {
       "home": "Ana Sayfa",
       "gallery": "Galeri",
-      "upload": "Fotoğraf Yükle",
+      "upload": "Fotoğraf / Video Yükle",
       "qr": "QR Kod",
       "menuOpen": "Menüyü aç",
       "menuClose": "Menüyü kapat"
     },
     "home": {
-      "uploadBtn": "Fotoğraf Yükle",
+      "uploadBtn": "Fotoğraf / Video Yükle",
       "galleryBtn": "Galeriyi Gör",
       "dateLabel": "Tarih & Saat",
       "venueLabel": "Mekan",
@@ -33,35 +38,37 @@
       },
       "identity": {
         "title": "Kendinizi tanıtın",
-        "subtitle": "Fotoğraflarınızı yüklemeden önce adınızı girin.",
+        "subtitle": "Fotoğraf veya videolarınızı yüklemeden önce adınızı girin.",
         "nameLabel": "Adınız Soyadınız *",
         "namePlaceholder": "Örn. Ayşe Yılmaz",
         "phoneLabel": "Telefon Numarası (opsiyonel)",
         "phonePlaceholder": "05XX XXX XX XX",
+        "noteLabel": "Not (opsiyonel)",
+        "notePlaceholder": "Bize bir not bırakmak ister misiniz?",
         "continueBtn": "Devam Et",
         "backHome": "Ana sayfaya dön",
         "invalidInput": "Geçersiz bilgi"
       },
       "select": {
-        "dropTitle": "Fotoğrafları buraya sürükleyin",
+        "dropTitle": "Fotoğraf veya videoları buraya sürükleyin",
         "dropSub": "veya seçmek için tıklayın · kalan kota {remaining}",
         "selectBtn": "Dosya Seç",
         "clearAll": "Tümünü temizle",
-        "selectedInfo": "{valid} fotoğraf seçildi · {count}/{max}",
-        "uploadBtn": "{count} Fotoğrafı Yükle",
+        "selectedInfo": "{valid} dosya seçildi · {count}/{max}",
+        "uploadBtn": "{count} Dosyayı Yükle",
         "uploadBtnEmpty": "Yükle",
-        "tooMany": "En fazla {max} fotoğraf yükleyebilirsiniz",
-        "onlyNMore": "Sadece {n} fotoğraf daha eklenebilir"
+        "tooMany": "En fazla {max} dosya yükleyebilirsiniz",
+        "onlyNMore": "Sadece {n} dosya daha eklenebilir"
       },
       "uploading": {
         "title": "Fotoğraflarınız yükleniyor…",
         "progress": "Genel ilerleme {pct}%"
       },
       "success": {
-        "title": "Fotoğraflarınız alındı!",
-        "subtitle": "Onaylandıktan sonra galeride görünecek. Aşağıdaki bağlantıyı saklayarak fotoğraflarınızın durumunu takip edebilirsiniz.",
+        "title": "Dosyalarınız alındı!",
+        "subtitle": "Onaylandıktan sonra galeride görünecek. Aşağıdaki bağlantıyı saklayarak yüklediklerinizin durumunu takip edebilirsiniz.",
         "copyLink": "Bağlantıyı Kopyala",
-        "myPhotos": "Fotoğraflarım",
+        "myPhotos": "Yüklediklerim",
         "backGallery": "Galeriye Dön",
         "uploadMore": "Daha Fazla Yükle"
       },
@@ -87,14 +94,14 @@
       }
     },
     "myPhotos": {
-      "eyebrow": "Fotoğraflarım",
+      "eyebrow": "Yüklediklerim",
       "defaultTitle": "Yüklemeleriniz",
-      "shareHint": "Bu URL'yi paylaşarak fotoğraflarınızı gösterebilirsiniz.",
+      "shareHint": "Bu URL'yi paylaşarak yüklediklerinizi gösterebilirsiniz.",
       "copyLink": "Bağlantıyı Kopyala",
-      "addPhotos": "Fotoğraf Ekle",
+      "addPhotos": "Dosya Ekle",
       "invalidTitle": "Bağlantı geçersiz",
-      "noPhotosTitle": "Henüz fotoğraf yok",
-      "loadError": "Fotoğraflar yüklenemedi",
+      "noPhotosTitle": "Henüz dosya yok",
+      "loadError": "Dosyalar yüklenemedi",
       "sections": {
         "pending": {
           "title": "Onay Bekliyor",
@@ -102,11 +109,11 @@
         },
         "approved": {
           "title": "Onaylandı",
-          "hint": "Bu fotoğraflar galeride yayında."
+          "hint": "Bu dosyalar galeride yayında."
         },
         "rejected": {
           "title": "Reddedildi",
-          "hint": "Bu fotoğraflar yayınlanmadı."
+          "hint": "Bu dosyalar yayınlanmadı."
         }
       }
     },
@@ -208,7 +215,8 @@
           "rateLimitUploadsPerHour": "Saatlik Yükleme Limiti"
         },
         "features": {
-          "phoneField": "Telefon Alanını Göster"
+          "phoneField": "Telefon Alanını Göster",
+          "noteField": "Not Alanını Göster"
         },
         "language": {
           "label": "Site Dili",
@@ -318,6 +326,7 @@
         "uploadersTitle": "Yükleyenler",
         "colName": "İsim",
         "colPhone": "Telefon",
+        "colNote": "Not",
         "colPhotos": "Fotoğraf",
         "colStorage": "Depolama",
         "colFirst": "İlk",

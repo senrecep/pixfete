@@ -79,7 +79,11 @@ export const api = {
   },
 
   upload: {
-    createSession: (body: { uploaderName: string; uploaderPhone?: string }) =>
+    createSession: (body: {
+      uploaderName: string
+      uploaderPhone?: string
+      uploaderNote?: string
+    }) =>
       request<CreateSessionResponse>("/api/upload/session", {
         method: "POST",
         body,

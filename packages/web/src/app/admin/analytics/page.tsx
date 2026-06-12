@@ -177,6 +177,7 @@ export default function AnalyticsPage() {
                   <tr className="border-b border-accent-soft text-xs tracking-wide text-ink/40 uppercase">
                     <th className="py-2 pr-4">{a.colName}</th>
                     <th className="py-2 pr-4">{a.colPhone}</th>
+                    <th className="py-2 pr-4">{a.colNote}</th>
                     <th className="py-2 pr-4">{a.colPhotos}</th>
                     <th className="py-2 pr-4">{a.colStorage}</th>
                     <th className="py-2 pr-4">{a.colFirst}</th>
@@ -188,6 +189,15 @@ export default function AnalyticsPage() {
                     <tr key={u.sessionId} className="border-b border-accent-soft/60">
                       <td className="py-2.5 pr-4 font-medium text-ink">{u.uploaderName}</td>
                       <td className="py-2.5 pr-4 text-ink/60">{u.uploaderPhone ?? "—"}</td>
+                      <td className="max-w-[16rem] py-2.5 pr-4 text-ink/60">
+                        {u.uploaderNote ? (
+                          <span className="block truncate" title={u.uploaderNote}>
+                            {u.uploaderNote}
+                          </span>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
                       <td className="py-2.5 pr-4 text-ink/60">
                         {u.photoCount} ({interp(a.approvedShort, { count: u.approvedCount })})
                       </td>
@@ -200,7 +210,7 @@ export default function AnalyticsPage() {
                   ))}
                   {uploaders.uploaders.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-6 text-center text-ink/40">
+                      <td colSpan={7} className="py-6 text-center text-ink/40">
                         {a.noUploaders}
                       </td>
                     </tr>

@@ -494,6 +494,11 @@ export default function SettingsPage() {
               checked={form.features.phoneField}
               onChange={(v) => setForm({ ...form, features: { ...form.features, phoneField: v } })}
             />
+            <Toggle
+              label={s.features.noteField}
+              checked={form.features.noteField}
+              onChange={(v) => setForm({ ...form, features: { ...form.features, noteField: v } })}
+            />
             <div className="flex flex-col gap-1.5 sm:col-span-2">
               <label
                 htmlFor="site-locale"

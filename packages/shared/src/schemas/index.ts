@@ -19,6 +19,12 @@ export const CreateUploadSessionSchema = z.object({
     .regex(/^[\d\s\+\-\(\)]{7,20}$/, "Geçerli bir telefon numarası girin")
     .optional()
     .nullable(),
+  uploaderNote: z
+    .string()
+    .max(500, "Not en fazla 500 karakter olabilir")
+    .trim()
+    .optional()
+    .nullable(),
 })
 export type CreateUploadSessionInput = z.infer<typeof CreateUploadSessionSchema>
 
@@ -35,7 +41,9 @@ export const PrepareUploadSchema = z.object({
       }),
     )
     .min(1)
-    .max(30),
+    // Matches the upper bound of admin-configurable maxFilesPerSession; the
+    // route enforces the actual per-session limit at runtime.
+    .max(1000),
 })
 export type PrepareUploadInput = z.infer<typeof PrepareUploadSchema>
 
@@ -117,13 +125,15 @@ export const StorageSettingsSchema = z.object({
 })
 
 export const UploadLimitsSchema = z.object({
-  maxFileSizeMb: z.number().int().positive().max(500),
+  // Up to 4GB to accommodate event videos; the API also clamps to MAX_FILE_SIZE_BYTES.
+  maxFileSizeMb: z.number().int().positive().max(4096),
   maxFilesPerSession: z.number().int().positive().max(1000),
   rateLimitUploadsPerHour: z.number().int().positive().max(100000),
 })
 
 export const FeatureFlagsSchema = z.object({
   phoneField: z.boolean(),
+  noteField: z.boolean(),
 })
 
 export const LocaleSchema = z.enum(["en", "tr"])
@@ -176,7 +186,7 @@ export const DEFAULT_SETTINGS: AppSettingsInput = {
     r2: { endpoint: "", accessKey: "", secretKey: "", bucket: "", publicUrl: "" },
     gdrive: { serviceAccountJson: "", folderId: "" },
   },
-  upload: { maxFileSizeMb: 50, maxFilesPerSession: 30, rateLimitUploadsPerHour: 50 },
-  features: { phoneField: true },
+  upload: { maxFileSizeMb: 1024, maxFilesPerSession: 30, rateLimitUploadsPerHour: 50 },
+  features: { phoneField: true, noteField: true },
   locale: "en",
 }

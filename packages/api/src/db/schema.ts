@@ -4,6 +4,7 @@ export const uploadSessions = sqliteTable("upload_sessions", {
   id: text("id").primaryKey(),
   uploaderName: text("uploader_name").notNull(),
   uploaderPhone: text("uploader_phone"),
+  uploaderNote: text("uploader_note"),
   viewerToken: text("viewer_token").notNull().unique(),
   ipAddress: text("ip_address").notNull(),
   userAgent: text("user_agent").notNull(),

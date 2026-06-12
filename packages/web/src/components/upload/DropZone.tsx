@@ -58,7 +58,7 @@ export function DropZone({ onFiles, disabled, remaining }: DropZoneProps) {
       <input
         id={inputId}
         type="file"
-        accept="image/*"
+        accept="image/*,video/*"
         multiple
         className="hidden"
         disabled={disabled}

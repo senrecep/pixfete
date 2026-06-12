@@ -4,14 +4,17 @@ import { api } from "@/lib/api"
 import { DEFAULT_EVENT } from "@/lib/event"
 import type { Locale } from "@/lib/i18n"
 import { applyAccent } from "@/lib/theme"
-import type { EventConfig, FeatureFlags } from "@/lib/types"
+import type { EventConfig, FeatureFlags, PublicUploadLimits } from "@/lib/types"
 import { type ReactNode, createContext, use, useEffect, useState } from "react"
 
-const DEFAULT_FEATURES: FeatureFlags = { phoneField: true }
+const DEFAULT_FEATURES: FeatureFlags = { phoneField: true, noteField: true }
+const DEFAULT_UPLOAD: PublicUploadLimits = { maxFileSizeMb: 1024, maxFilesPerSession: 30 }
 
 interface EventContextValue {
   event: EventConfig
   features: FeatureFlags
+  /** Admin-managed upload limits, used to validate selected files client-side. */
+  upload: PublicUploadLimits
   /** UI language, fixed by the admin. English until the API responds. */
   locale: Locale
 }
@@ -21,6 +24,7 @@ interface EventContextValue {
 const EventContext = createContext<EventContextValue>({
   event: DEFAULT_EVENT,
   features: DEFAULT_FEATURES,
+  upload: DEFAULT_UPLOAD,
   locale: "en",
 })
 
@@ -28,6 +32,7 @@ export function EventProvider({ children }: { children: ReactNode }) {
   const [value, setValue] = useState<EventContextValue>({
     event: DEFAULT_EVENT,
     features: DEFAULT_FEATURES,
+    upload: DEFAULT_UPLOAD,
     locale: "en",
   })
 
@@ -36,7 +41,13 @@ export function EventProvider({ children }: { children: ReactNode }) {
     api.event
       .getInfo()
       .then((res) => {
-        if (active) setValue({ event: res.event, features: res.features, locale: res.locale })
+        if (active)
+          setValue({
+            event: res.event,
+            features: res.features,
+            upload: res.upload,
+            locale: res.locale,
+          })
       })
       .catch(() => {
         // Keep defaults if the API is unreachable.

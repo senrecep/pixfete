@@ -1,9 +1,14 @@
 /**
- * Detects an image MIME type from the leading bytes of a file buffer.
+ * Detects an image or video MIME type from the leading bytes of a file buffer.
  * Returns the canonical MIME string, or null if no known signature matches.
  */
 export function detectMimeFromBytes(buffer: Buffer): string | null {
   if (buffer.length < 4) return null
+
+  // Matroska / WebM: EBML header 1A 45 DF A3
+  if (buffer[0] === 0x1a && buffer[1] === 0x45 && buffer[2] === 0xdf && buffer[3] === 0xa3) {
+    return "video/webm"
+  }
 
   // JPEG: FF D8 FF
   if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
@@ -11,12 +16,7 @@ export function detectMimeFromBytes(buffer: Buffer): string | null {
   }
 
   // PNG: 89 50 4E 47 0D 0A 1A 0A
-  if (
-    buffer[0] === 0x89 &&
-    buffer[1] === 0x50 &&
-    buffer[2] === 0x4e &&
-    buffer[3] === 0x47
-  ) {
+  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) {
     return "image/png"
   }
 
@@ -56,13 +56,38 @@ export function detectMimeFromBytes(buffer: Buffer): string | null {
     const heifBrands = ["mif1", "msf1", "heif"]
     if (heicBrands.includes(brand)) return "image/heic"
     if (heifBrands.includes(brand)) return "image/heif"
+
+    // QuickTime movies carry the "qt  " major brand (note trailing spaces).
+    if (brand === "qt  ") return "video/quicktime"
+    // MP4 family — common major brands written by phones/cameras/encoders,
+    // including the 3GPP/3GPP2 brands many Android devices stamp on .mp4 files.
+    const mp4Brands = [
+      "isom",
+      "iso2",
+      "iso4",
+      "iso5",
+      "iso6",
+      "mp41",
+      "mp42",
+      "mmp4",
+      "avc1",
+      "dash",
+      "M4V ",
+      "M4A ",
+      "3gp4",
+      "3gp5",
+      "3gp6",
+      "3gg6",
+      "3g2a",
+    ]
+    if (mp4Brands.includes(brand)) return "video/mp4"
   }
 
   return null
 }
 
-/** True if the detected MIME is one of the allowed image types. */
-export function isAllowedImageBuffer(buffer: Buffer): boolean {
+/** True if the detected MIME is one of the allowed image or video types. */
+export function isAllowedMediaBuffer(buffer: Buffer): boolean {
   const mime = detectMimeFromBytes(buffer)
   return mime !== null
 }

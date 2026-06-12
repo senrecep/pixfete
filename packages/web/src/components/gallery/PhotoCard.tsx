@@ -1,14 +1,13 @@
 "use client"
 
+import { MediaThumb } from "@/components/ui/MediaThumb"
 import { useEventCopy } from "@/hooks/useEventCopy"
 import { interp } from "@/lib/i18n"
 import { photoSrc } from "@/lib/photo"
 import type { Photo } from "@/lib/types"
-import { cn } from "@/lib/utils"
 import { useI18n } from "@/providers/I18nProvider"
 import { motion } from "framer-motion"
 import { ImageOff } from "lucide-react"
-import { useState } from "react"
 
 interface PhotoCardProps {
   photo: Photo
@@ -19,7 +18,6 @@ interface PhotoCardProps {
 export function PhotoCard({ photo, onClick }: PhotoCardProps) {
   const { t } = useI18n()
   const copy = useEventCopy()
-  const [loaded, setLoaded] = useState(false)
   const aspectRatio = photo.width && photo.height ? photo.width / photo.height : 0.75
   const src = photoSrc(photo)
 
@@ -35,19 +33,12 @@ export function PhotoCard({ photo, onClick }: PhotoCardProps) {
       aria-label={interp(t.gallery.expandPhoto, { name: photo.uploaderName })}
     >
       <div className="relative w-full" style={{ aspectRatio: String(aspectRatio) }}>
-        {!loaded && src ? <div className="skeleton absolute inset-0" /> : null}
         {src ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <MediaThumb
             src={src}
+            photo={photo}
             alt={interp(copy.photoAlt, { name: photo.uploaderName })}
-            loading="lazy"
-            decoding="async"
-            onLoad={() => setLoaded(true)}
-            className={cn(
-              "h-full w-full object-cover transition-all duration-500 group-hover:scale-105",
-              loaded ? "opacity-100" : "opacity-0",
-            )}
+            mediaClassName="group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">

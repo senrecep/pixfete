@@ -435,6 +435,7 @@ export const adminRoutes = new Elysia({ prefix: "/api/admin" })
           sessionId: session.id,
           uploaderName: session.uploaderName,
           uploaderPhone: session.uploaderPhone ?? null,
+          uploaderNote: session.uploaderNote ?? null,
           photoCount: row?.photoCount ?? 0,
           approvedCount: Number(row?.approvedCount ?? 0),
           pendingCount: Number(row?.pendingCount ?? 0),

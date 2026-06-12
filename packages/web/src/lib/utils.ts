@@ -14,23 +14,41 @@ export function formatBytes(bytes: number, decimals = 1): string {
   return `${value.toFixed(value < 10 && i > 0 ? decimals : 0)} ${sizes[i]}`
 }
 
-export function readImageDimensions(file: File): Promise<{ width: number; height: number } | null> {
+export function readMediaDimensions(file: File): Promise<{ width: number; height: number } | null> {
   return new Promise((resolve) => {
-    if (!file.type.startsWith("image/")) {
-      resolve(null)
+    const url = URL.createObjectURL(file)
+
+    if (file.type.startsWith("image/")) {
+      const img = new Image()
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        resolve({ width: img.naturalWidth, height: img.naturalHeight })
+      }
+      img.onerror = () => {
+        URL.revokeObjectURL(url)
+        resolve(null)
+      }
+      img.src = url
       return
     }
-    const url = URL.createObjectURL(file)
-    const img = new Image()
-    img.onload = () => {
-      URL.revokeObjectURL(url)
-      resolve({ width: img.naturalWidth, height: img.naturalHeight })
+
+    if (file.type.startsWith("video/")) {
+      const video = document.createElement("video")
+      video.preload = "metadata"
+      video.onloadedmetadata = () => {
+        URL.revokeObjectURL(url)
+        resolve({ width: video.videoWidth, height: video.videoHeight })
+      }
+      video.onerror = () => {
+        URL.revokeObjectURL(url)
+        resolve(null)
+      }
+      video.src = url
+      return
     }
-    img.onerror = () => {
-      URL.revokeObjectURL(url)
-      resolve(null)
-    }
-    img.src = url
+
+    URL.revokeObjectURL(url)
+    resolve(null)
   })
 }
 

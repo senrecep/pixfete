@@ -1,13 +1,14 @@
 "use client"
 
+import { MediaFallback } from "@/components/ui/MediaFallback"
 import { useEventCopy } from "@/hooks/useEventCopy"
 import { interp } from "@/lib/i18n"
-import { photoSrc } from "@/lib/photo"
+import { isVideo, mediaFormatLabel, photoSrc } from "@/lib/photo"
 import type { Photo } from "@/lib/types"
 import { useI18n } from "@/providers/I18nProvider"
 import { AnimatePresence, motion } from "framer-motion"
 import { ChevronLeft, ChevronRight, X } from "lucide-react"
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 interface LightboxProps {
   photos: Photo[]
@@ -108,11 +109,11 @@ export function Lightbox({ photos, index, onClose, onNavigate, viewerToken }: Li
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.25 }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <LightboxMedia
+              key={current.id}
+              photo={current}
               src={photoSrc(current, viewerToken) ?? undefined}
               alt={interp(copy.photoAlt, { name: current.uploaderName })}
-              className="max-h-[80dvh] max-w-full rounded-lg object-contain shadow-2xl"
             />
             <p className="mt-4 font-display text-xl text-white/90">{current.uploaderName}</p>
           </motion.div>
@@ -130,5 +131,55 @@ export function Lightbox({ photos, index, onClose, onNavigate, viewerToken }: Li
         </motion.div>
       ) : null}
     </AnimatePresence>
+  )
+}
+
+/**
+ * Full-size media for the lightbox. Kept as a child (keyed by photo id) so its
+ * decode-failure state resets when the user navigates between items. Falls back
+ * to a MediaFallback when the browser can't render the file (HEIC/HEVC, …).
+ */
+function LightboxMedia({
+  photo,
+  src,
+  alt,
+}: {
+  photo: Photo
+  src: string | undefined
+  alt: string
+}) {
+  const { t } = useI18n()
+  const [failed, setFailed] = useState(false)
+
+  if (!src || failed) {
+    return (
+      <div className="flex h-[55dvh] w-[85vw] max-w-md items-center justify-center overflow-hidden rounded-lg">
+        <MediaFallback
+          label={t.media.unavailable}
+          format={src ? mediaFormatLabel(photo.fileName, photo.mimeType) : undefined}
+        />
+      </div>
+    )
+  }
+
+  return isVideo(photo) ? (
+    <video
+      src={src}
+      controls
+      autoPlay
+      playsInline
+      aria-label={alt}
+      onError={() => setFailed(true)}
+      className="max-h-[80dvh] max-w-full rounded-lg object-contain shadow-2xl"
+    >
+      <track kind="captions" />
+    </video>
+  ) : (
+    <img
+      src={src}
+      alt={alt}
+      onError={() => setFailed(true)}
+      className="max-h-[80dvh] max-w-full rounded-lg object-contain shadow-2xl"
+    />
   )
 }

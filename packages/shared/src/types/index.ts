@@ -5,6 +5,7 @@ export interface Photo {
   uploaderSessionId: string
   uploaderName: string
   uploaderPhone: string | null
+  uploaderNote: string | null
   fileName: string
   originalSize: number
   storageType: StorageProvider
@@ -24,6 +25,7 @@ export interface UploadSession {
   id: string
   uploaderName: string
   uploaderPhone: string | null
+  uploaderNote: string | null
   viewerToken: string
   ipAddress: string
   userAgent: string
@@ -72,15 +74,23 @@ export interface EventConfig {
 
 export interface FeatureFlags {
   phoneField: boolean
+  noteField: boolean
 }
 
 /** UI language. Fixed by the admin; the same locale is served to every guest. */
 export type Locale = "en" | "tr"
 
+/** Upload limits exposed publicly so the uploader UI can validate client-side. */
+export interface PublicUploadLimits {
+  maxFileSizeMb: number
+  maxFilesPerSession: number
+}
+
 /** Public, non-secret settings served to the web app at runtime. */
 export interface PublicSettings {
   event: EventConfig
   features: FeatureFlags
+  upload: PublicUploadLimits
   locale: Locale
 }
 
@@ -131,6 +141,7 @@ export interface UploaderStats {
   sessionId: string
   uploaderName: string
   uploaderPhone: string | null
+  uploaderNote: string | null
   photoCount: number
   approvedCount: number
   pendingCount: number

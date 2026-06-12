@@ -1,15 +1,20 @@
 {
   "strings": {
+    "media": {
+      "unavailable": "This file can't be previewed in your browser.",
+      "unavailableUploaded": "This file can't be previewed in your browser, but it was uploaded successfully.",
+      "unavailableLocal": "This file can't be previewed in your browser — it can still be uploaded."
+    },
     "nav": {
       "home": "Home",
       "gallery": "Gallery",
-      "upload": "Upload Photos",
+      "upload": "Upload Photos / Videos",
       "qr": "QR Code",
       "menuOpen": "Open menu",
       "menuClose": "Close menu"
     },
     "home": {
-      "uploadBtn": "Upload Photo",
+      "uploadBtn": "Upload Photo / Video",
       "galleryBtn": "View Gallery",
       "dateLabel": "Date & Time",
       "venueLabel": "Venue",
@@ -33,35 +38,37 @@
       },
       "identity": {
         "title": "Introduce yourself",
-        "subtitle": "Enter your name before uploading photos.",
+        "subtitle": "Enter your name before uploading photos or videos.",
         "nameLabel": "Full Name *",
         "namePlaceholder": "e.g. Jane Smith",
         "phoneLabel": "Phone Number (optional)",
         "phonePlaceholder": "+1 555 000 0000",
+        "noteLabel": "Note (optional)",
+        "notePlaceholder": "Would you like to leave us a note?",
         "continueBtn": "Continue",
         "backHome": "Back to home",
         "invalidInput": "Invalid input"
       },
       "select": {
-        "dropTitle": "Drag photos here",
+        "dropTitle": "Drag photos or videos here",
         "dropSub": "or click to select · {remaining} remaining",
         "selectBtn": "Select Files",
         "clearAll": "Clear all",
-        "selectedInfo": "{valid} photo(s) selected · {count}/{max}",
-        "uploadBtn": "Upload {count} Photo(s)",
+        "selectedInfo": "{valid} file(s) selected · {count}/{max}",
+        "uploadBtn": "Upload {count} File(s)",
         "uploadBtnEmpty": "Upload",
-        "tooMany": "You can upload a maximum of {max} photos",
-        "onlyNMore": "Only {n} more photo(s) can be added"
+        "tooMany": "You can upload a maximum of {max} files",
+        "onlyNMore": "Only {n} more file(s) can be added"
       },
       "uploading": {
         "title": "Uploading your photos…",
         "progress": "Overall progress {pct}%"
       },
       "success": {
-        "title": "Photos received!",
-        "subtitle": "They will appear in the gallery after approval. Save the link below to track your photos.",
+        "title": "Files received!",
+        "subtitle": "They will appear in the gallery after approval. Save the link below to track your uploads.",
         "copyLink": "Copy Link",
-        "myPhotos": "My Photos",
+        "myPhotos": "My Uploads",
         "backGallery": "Back to Gallery",
         "uploadMore": "Upload More"
       },
@@ -87,14 +94,14 @@
       }
     },
     "myPhotos": {
-      "eyebrow": "My Photos",
+      "eyebrow": "My Uploads",
       "defaultTitle": "Your Uploads",
-      "shareHint": "Share this URL to show your photos.",
+      "shareHint": "Share this URL to show your uploads.",
       "copyLink": "Copy Link",
-      "addPhotos": "Add Photos",
+      "addPhotos": "Add Files",
       "invalidTitle": "Invalid link",
-      "noPhotosTitle": "No photos yet",
-      "loadError": "Could not load photos",
+      "noPhotosTitle": "Nothing uploaded yet",
+      "loadError": "Could not load uploads",
       "sections": {
         "pending": {
           "title": "Awaiting Approval",
@@ -102,11 +109,11 @@
         },
         "approved": {
           "title": "Approved",
-          "hint": "These photos are live in the gallery."
+          "hint": "These are live in the gallery."
         },
         "rejected": {
           "title": "Rejected",
-          "hint": "These photos were not published."
+          "hint": "These were not published."
         }
       }
     },
@@ -208,7 +215,8 @@
           "rateLimitUploadsPerHour": "Upload Rate Limit (per hour)"
         },
         "features": {
-          "phoneField": "Show Phone Field"
+          "phoneField": "Show Phone Field",
+          "noteField": "Show Note Field"
         },
         "language": {
           "label": "Site Language",
@@ -318,6 +326,7 @@
         "uploadersTitle": "Uploaders",
         "colName": "Name",
         "colPhone": "Phone",
+        "colNote": "Note",
         "colPhotos": "Photos",
         "colStorage": "Storage",
         "colFirst": "First",

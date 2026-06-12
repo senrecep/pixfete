@@ -2,12 +2,16 @@ import type { Photo, StorageProvider } from "@pixfete/shared"
 import type { PhotoRow, UploadSessionRow } from "./db/schema"
 
 /** Maps a photos row joined with its uploader session into the shared Photo shape. */
-export function toPhoto(row: PhotoRow, session: Pick<UploadSessionRow, "uploaderName" | "uploaderPhone">): Photo {
+export function toPhoto(
+  row: PhotoRow,
+  session: Pick<UploadSessionRow, "uploaderName" | "uploaderPhone" | "uploaderNote">,
+): Photo {
   return {
     id: row.id,
     uploaderSessionId: row.uploaderSessionId,
     uploaderName: session.uploaderName,
     uploaderPhone: session.uploaderPhone ?? null,
+    uploaderNote: session.uploaderNote ?? null,
     fileName: row.fileName,
     originalSize: row.originalSize,
     storageType: row.storageType as StorageProvider,

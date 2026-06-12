@@ -3,6 +3,7 @@
 import { AdminLayout } from "@/components/admin/AdminLayout"
 import { StatsCard } from "@/components/admin/StatsCard"
 import { Badge } from "@/components/ui/Badge"
+import { MediaThumb } from "@/components/ui/MediaThumb"
 import { useApiError } from "@/hooks/useApiError"
 import { api } from "@/lib/api"
 import { photoSrc } from "@/lib/photo"
@@ -16,6 +17,7 @@ import {
   HardDrive,
   ImageOff,
   Images,
+  MessageSquareText,
   TrendingUp,
   Users,
   XCircle,
@@ -75,14 +77,54 @@ export default function DashboardPage() {
       ) : (
         <>
           <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <StatsCard label={t.admin.dashboard.stats.total} value={data.stats.totalPhotos} icon={Images} accent="purple" />
-            <StatsCard label={t.admin.dashboard.stats.pending} value={data.stats.pendingPhotos} icon={Clock} accent="amber" />
-            <StatsCard label={t.admin.dashboard.stats.approved} value={data.stats.approvedPhotos} icon={CheckCircle2} accent="green" />
-            <StatsCard label={t.admin.dashboard.stats.rejected} value={data.stats.rejectedPhotos} icon={XCircle} accent="red" />
-            <StatsCard label={t.admin.dashboard.stats.uploaders} value={data.stats.totalUploaders} icon={Users} accent="blue" />
-            <StatsCard label={t.admin.dashboard.stats.storage} value={formatBytes(data.stats.totalStorageBytes)} icon={HardDrive} accent="purple" />
-            <StatsCard label={t.admin.dashboard.stats.today} value={data.stats.uploadsToday} icon={TrendingUp} accent="green" />
-            <StatsCard label={t.admin.dashboard.stats.thisWeek} value={data.stats.uploadsThisWeek} icon={TrendingUp} accent="blue" />
+            <StatsCard
+              label={t.admin.dashboard.stats.total}
+              value={data.stats.totalPhotos}
+              icon={Images}
+              accent="purple"
+            />
+            <StatsCard
+              label={t.admin.dashboard.stats.pending}
+              value={data.stats.pendingPhotos}
+              icon={Clock}
+              accent="amber"
+            />
+            <StatsCard
+              label={t.admin.dashboard.stats.approved}
+              value={data.stats.approvedPhotos}
+              icon={CheckCircle2}
+              accent="green"
+            />
+            <StatsCard
+              label={t.admin.dashboard.stats.rejected}
+              value={data.stats.rejectedPhotos}
+              icon={XCircle}
+              accent="red"
+            />
+            <StatsCard
+              label={t.admin.dashboard.stats.uploaders}
+              value={data.stats.totalUploaders}
+              icon={Users}
+              accent="blue"
+            />
+            <StatsCard
+              label={t.admin.dashboard.stats.storage}
+              value={formatBytes(data.stats.totalStorageBytes)}
+              icon={HardDrive}
+              accent="purple"
+            />
+            <StatsCard
+              label={t.admin.dashboard.stats.today}
+              value={data.stats.uploadsToday}
+              icon={TrendingUp}
+              accent="green"
+            />
+            <StatsCard
+              label={t.admin.dashboard.stats.thisWeek}
+              value={data.stats.uploadsThisWeek}
+              icon={TrendingUp}
+              accent="blue"
+            />
           </div>
 
           <div className="mt-10 grid gap-6 lg:grid-cols-2">
@@ -97,25 +139,34 @@ export default function DashboardPage() {
                       key={photo.id}
                       className="flex items-center gap-3 rounded-xl border border-accent-soft p-2.5"
                     >
-                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent-soft">
+                      <div className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent-soft">
                         {(() => {
                           const src = photoSrc(photo)
-                          return src ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
+                          if (!src) return <ImageOff className="h-5 w-5 text-accent/40" />
+                          return (
+                            <MediaThumb
                               src={src}
+                              photo={photo}
                               alt={photo.fileName}
-                              loading="lazy"
-                              className="h-full w-full object-cover"
+                              badge="sm"
+                              compact
                             />
-                          ) : (
-                            <ImageOff className="h-5 w-5 text-accent/40" />
                           )
                         })()}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-ink">{photo.uploaderName}</p>
-                        <p className="text-xs text-ink/40">{format(photo.uploadedAt, "dd.MM HH:mm")}</p>
+                        <p className="truncate text-sm font-medium text-ink">
+                          {photo.uploaderName}
+                        </p>
+                        <p className="text-xs text-ink/40">
+                          {format(photo.uploadedAt, "dd.MM HH:mm")}
+                        </p>
+                        {photo.uploaderNote ? (
+                          <p className="mt-0.5 flex items-start gap-1 text-xs text-ink/60">
+                            <MessageSquareText className="mt-0.5 h-3 w-3 flex-shrink-0 text-accent" />
+                            <span className="line-clamp-2">{photo.uploaderNote}</span>
+                          </p>
+                        ) : null}
                       </div>
                       {photo.status === "pending" ? (
                         <div className="flex gap-1.5">
@@ -159,7 +210,9 @@ export default function DashboardPage() {
                       className="flex items-center justify-between rounded-xl border border-accent-soft px-3 py-2 text-sm"
                     >
                       <span className="font-medium text-accent-dark">{event.eventType}</span>
-                      <span className="text-xs text-ink/40">{format(event.createdAt, "dd.MM HH:mm")}</span>
+                      <span className="text-xs text-ink/40">
+                        {format(event.createdAt, "dd.MM HH:mm")}
+                      </span>
                     </li>
                   ))}
                 </ul>

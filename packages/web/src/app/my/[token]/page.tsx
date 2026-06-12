@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer"
 import { Header } from "@/components/layout/Header"
 import { Badge } from "@/components/ui/Badge"
 import { CopyButton } from "@/components/ui/CopyButton"
+import { MediaThumb } from "@/components/ui/MediaThumb"
 import { Spinner } from "@/components/ui/Spinner"
 import { useApiError } from "@/hooks/useApiError"
 import { api } from "@/lib/api"
@@ -151,15 +152,15 @@ export default function MyPhotosPage({
                               <button
                                 type="button"
                                 onClick={() => setLightbox({ photos: list, index: i })}
-                                className="h-full w-full cursor-zoom-in"
+                                className="relative h-full w-full cursor-zoom-in"
                                 aria-label={photo.fileName}
                               >
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
+                                <MediaThumb
                                   src={src}
+                                  photo={photo}
                                   alt={photo.fileName}
-                                  loading="lazy"
-                                  className="h-full w-full object-cover"
+                                  badge="sm"
+                                  fallbackLabel={t.media.unavailableUploaded}
                                 />
                               </button>
                             ) : (

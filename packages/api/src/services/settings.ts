@@ -114,6 +114,7 @@ function envSeed(): AppSettingsInput {
     },
     features: {
       phoneField: envBool("FEATURE_PHONE_FIELD", d.features.phoneField),
+      noteField: envBool("FEATURE_NOTE_FIELD", d.features.noteField),
     },
     locale: process.env.DEFAULT_LOCALE === "tr" ? "tr" : d.locale,
   }
@@ -155,7 +156,15 @@ export function getSettings(): AppSettingsInput {
 /** Non-secret settings served to the web app. */
 export function getPublicSettings(): PublicSettings {
   const s = load()
-  return { event: s.event, features: s.features, locale: s.locale }
+  return {
+    event: s.event,
+    features: s.features,
+    upload: {
+      maxFileSizeMb: s.upload.maxFileSizeMb,
+      maxFilesPerSession: s.upload.maxFilesPerSession,
+    },
+    locale: s.locale,
+  }
 }
 
 /** Admin view — secret values replaced with "set" markers. */

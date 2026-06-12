@@ -12,7 +12,7 @@ import { useApiError } from "@/hooks/useApiError"
 import { ApiClientError, api } from "@/lib/api"
 import { SITE_URL } from "@/lib/event"
 import { interp } from "@/lib/i18n"
-import { formatBytes, readImageDimensions } from "@/lib/utils"
+import { formatBytes, readMediaDimensions } from "@/lib/utils"
 import { useEvent } from "@/providers/EventProvider"
 import { useI18n } from "@/providers/I18nProvider"
 import {
@@ -26,8 +26,6 @@ import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
-const MAX_FILES = 30
-const MAX_FILE_SIZE = 50 * 1024 * 1024
 const ALLOWED = new Set<string>(ALLOWED_MIME_TYPES)
 // Persisted on the uploader's device so a return visit reuses the same session
 // (and gallery) without re-deriving access from name/phone.
@@ -54,20 +52,24 @@ function extractDriveFileId(responseBody: string): string | undefined {
   return /"id"\s*:\s*"([^"]+)"/.exec(responseBody)?.[1]
 }
 
-function getValidationCode(file: File): string | undefined {
+function getValidationCode(file: File, maxFileSize: number): string | undefined {
   if (!ALLOWED.has(file.type)) return "Upload.InvalidMimeType"
-  if (file.size > MAX_FILE_SIZE) return "Upload.FileTooLarge"
+  if (file.size > maxFileSize) return "Upload.FileTooLarge"
   return undefined
 }
 
 export default function UploadPage() {
   const { t, te } = useI18n()
-  const { features } = useEvent()
+  const { features, upload } = useEvent()
   const { getErrorMessage } = useApiError()
+
+  const maxFiles = upload.maxFilesPerSession
+  const maxFileSize = upload.maxFileSizeMb * 1024 * 1024
 
   const [step, setStep] = useState<Step>("identity")
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
+  const [note, setNote] = useState("")
   const [nameError, setNameError] = useState<string>()
   const [creatingSession, setCreatingSession] = useState(false)
 
@@ -79,7 +81,7 @@ export default function UploadPage() {
   const [uploadItems, setUploadItems] = useState<UploadItem[]>([])
 
   const validFiles = useMemo(() => files.filter((f) => !f.error), [files])
-  const remaining = MAX_FILES - files.length
+  const remaining = maxFiles - files.length
 
   const overallProgress = useMemo(() => {
     if (uploadItems.length === 0) return 0
@@ -124,6 +126,7 @@ export default function UploadPage() {
     setViewerToken(null)
     setName("")
     setPhone("")
+    setNote("")
     setFiles([])
     setUploadItems([])
     setStep("identity")
@@ -133,6 +136,7 @@ export default function UploadPage() {
     const parsed = CreateUploadSessionSchema.safeParse({
       uploaderName: name,
       uploaderPhone: phone.trim() === "" ? null : phone.trim(),
+      uploaderNote: note.trim() === "" ? null : note.trim(),
     })
     if (!parsed.success) {
       const issue = parsed.error.issues[0]
@@ -145,6 +149,7 @@ export default function UploadPage() {
       const res = await api.upload.createSession({
         uploaderName: parsed.data.uploaderName,
         ...(parsed.data.uploaderPhone ? { uploaderPhone: parsed.data.uploaderPhone } : {}),
+        ...(parsed.data.uploaderNote ? { uploaderNote: parsed.data.uploaderNote } : {}),
       })
       setSessionId(res.sessionId)
       setViewerToken(res.viewerToken)
@@ -163,13 +168,13 @@ export default function UploadPage() {
 
   const addFiles = (incoming: File[]) => {
     setFiles((prev) => {
-      const space = MAX_FILES - prev.length
+      const space = maxFiles - prev.length
       if (space <= 0) {
-        toast.error(interp(t.upload.select.tooMany, { max: MAX_FILES }))
+        toast.error(interp(t.upload.select.tooMany, { max: maxFiles }))
         return prev
       }
       const accepted = incoming.slice(0, space).map<SelectedFile>((file) => {
-        const errCode = getValidationCode(file)
+        const errCode = getValidationCode(file, maxFileSize)
         return { id: makeId(), file, error: errCode ? te(errCode) : undefined }
       })
       if (incoming.length > space) {
@@ -190,7 +195,7 @@ export default function UploadPage() {
     const withDims = await Promise.all(
       validFiles.map(async (sf) => ({
         sf,
-        dims: await readImageDimensions(sf.file),
+        dims: await readMediaDimensions(sf.file),
       })),
     )
 
@@ -307,6 +312,25 @@ export default function UploadPage() {
                       onChange={(e) => setPhone(e.target.value)}
                     />
                   ) : null}
+                  {features.noteField ? (
+                    <div className="flex flex-col gap-1.5">
+                      <label
+                        htmlFor="uploader-note"
+                        className="text-sm font-medium tracking-wide text-ink/80"
+                      >
+                        {t.upload.identity.noteLabel}
+                      </label>
+                      <textarea
+                        id="uploader-note"
+                        rows={3}
+                        maxLength={500}
+                        placeholder={t.upload.identity.notePlaceholder}
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        className="w-full rounded-xl border border-accent-light/40 bg-white px-4 py-3 text-ink placeholder:text-ink/30 transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+                      />
+                    </div>
+                  ) : null}
                   <Button
                     size="lg"
                     loading={creatingSession}
@@ -349,7 +373,7 @@ export default function UploadPage() {
                         {interp(t.upload.select.selectedInfo, {
                           valid: validFiles.length,
                           count: files.length,
-                          max: MAX_FILES,
+                          max: maxFiles,
                         })}
                       </span>
                       <button
