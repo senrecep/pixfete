@@ -32,10 +32,7 @@ export function errorBody(error: AppError): ErrorBody {
  * on failure sets the HTTP status from the first error and returns
  * `{ code, message }` (the envelope the web client expects).
  */
-export function respond<T>(
-  result: Result<T>,
-  set: { status?: number | string },
-): T | ErrorBody {
+export function respond<T>(result: Result<T>, set: { status?: number | string }): T | ErrorBody {
   if (R.isSuccess(result)) {
     return result.value
   }

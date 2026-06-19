@@ -1,14 +1,12 @@
+import { GoogleDriveAdapter } from "./adapters/gdrive"
 import { LocalStorageAdapter } from "./adapters/local"
 import { R2StorageAdapter } from "./adapters/r2"
-import { GoogleDriveAdapter } from "./adapters/gdrive"
 import type { StorageAdapter, StorageEnv } from "./types"
 
 function requireEnv(env: StorageEnv, key: keyof StorageEnv, provider: string): string {
   const value = env[key]
   if (!value) {
-    throw new Error(
-      `Storage provider "${provider}" requires env var ${key} but it is not set`,
-    )
+    throw new Error(`Storage provider "${provider}" requires env var ${key} but it is not set`)
   }
   return value
 }

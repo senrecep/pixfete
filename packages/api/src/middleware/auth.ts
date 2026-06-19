@@ -1,5 +1,5 @@
-import { Elysia } from "elysia"
 import { eq } from "drizzle-orm"
+import { Elysia } from "elysia"
 import { Err } from "tsentials/errors"
 import { Result as R } from "tsentials/result"
 import { db } from "../db"
@@ -12,7 +12,10 @@ const COOKIE_NAME = "pixfete_admin"
 // 401 for any unauthenticated admin request (missing / invalid / expired token).
 const unauthorized = () => Err.unauthorized("Auth.Unauthorized", "Authentication required")
 
-function extractToken(authHeader: string | undefined, cookieHeader: string | undefined): string | null {
+function extractToken(
+  authHeader: string | undefined,
+  cookieHeader: string | undefined,
+): string | null {
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.slice(7).trim()
     if (token) return token
@@ -45,12 +48,7 @@ export async function resolveAdminSessionId(
   if (!R.isSuccess(verified)) return null
 
   const sessionId = verified.value.adminSessionId
-  const rows = db
-    .select()
-    .from(adminSessions)
-    .where(eq(adminSessions.id, sessionId))
-    .limit(1)
-    .all()
+  const rows = db.select().from(adminSessions).where(eq(adminSessions.id, sessionId)).limit(1).all()
   const session = rows[0]
   if (!session || session.revoked || session.expiresAt <= Date.now()) return null
   return sessionId

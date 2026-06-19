@@ -190,7 +190,7 @@ export const DEFAULT_SETTINGS: AppSettingsInput = {
     r2: { endpoint: "", accessKey: "", secretKey: "", bucket: "", publicUrl: "" },
     gdrive: { serviceAccountJson: "", folderId: "" },
   },
-  upload: { maxFileSizeMb: 1024, maxFilesPerSession: 30, rateLimitUploadsPerHour: 50 },
+  upload: { maxFileSizeMb: 1024, maxFilesPerSession: 30, rateLimitUploadsPerHour: 200 },
   features: { phoneField: true, noteField: true },
   locale: "en",
 }

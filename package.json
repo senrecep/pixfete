@@ -2,9 +2,7 @@
   "name": "pixfete",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": ["packages/*"],
   "scripts": {
     "dev": "bun run --filter='*' dev",
     "dev:api": "bun run --filter='@pixfete/api' dev",

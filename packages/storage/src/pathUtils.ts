@@ -1,6 +1,16 @@
 const TR_MAP: Record<string, string> = {
-  ı: "i", İ: "i", ş: "s", Ş: "s", ğ: "g", Ğ: "g",
-  ç: "c", Ç: "c", ö: "o", Ö: "o", ü: "u", Ü: "u",
+  ı: "i",
+  İ: "i",
+  ş: "s",
+  Ş: "s",
+  ğ: "g",
+  Ğ: "g",
+  ç: "c",
+  Ç: "c",
+  ö: "o",
+  Ö: "o",
+  ü: "u",
+  Ü: "u",
 }
 
 /**
@@ -9,15 +19,17 @@ const TR_MAP: Record<string, string> = {
  * "İbrahim Öztürk" → "ibrahim-ozturk"
  */
 export function nameToSlug(name: string): string {
-  return name
-    .split("")
-    .map((c) => TR_MAP[c] ?? c)
-    .join("")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 50) || "uploader"
+  return (
+    name
+      .split("")
+      .map((c) => TR_MAP[c] ?? c)
+      .join("")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 50) || "uploader"
+  )
 }
 
 /** Sanitizes a file name to prevent path traversal. */

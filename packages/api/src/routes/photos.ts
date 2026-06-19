@@ -1,14 +1,14 @@
-import { Elysia } from "elysia"
-import { and, desc, eq, sql } from "drizzle-orm"
 // `and` is used for the public gallery composite predicate below.
 import { PixfeteErr } from "@pixfete/shared"
-import { getPublicSettings } from "../services/settings"
+import { and, desc, eq, sql } from "drizzle-orm"
+import { Elysia } from "elysia"
+import { track } from "../analytics"
 import { db } from "../db"
 import { photos, uploadSessions } from "../db/schema"
 import { errorBody } from "../http"
 import { toPhoto } from "../mappers"
+import { getPublicSettings } from "../services/settings"
 import { clientIp, userAgent } from "../util"
-import { track } from "../analytics"
 
 function parsePage(value: string | undefined, fallback: number): number {
   const n = Number(value)
@@ -63,11 +63,7 @@ export const photoRoutes = new Elysia()
 
     const where = and(eq(photos.status, "approved"), eq(photos.uploadComplete, true))
 
-    const totalRow = db
-      .select({ count: sql<number>`count(*)` })
-      .from(photos)
-      .where(where)
-      .all()
+    const totalRow = db.select({ count: sql<number>`count(*)` }).from(photos).where(where).all()
     const total = totalRow[0]?.count ?? 0
 
     const rows = db

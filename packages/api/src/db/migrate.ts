@@ -40,6 +40,5 @@ export function runMigrations(): void {
 // Allow running directly: `bun run src/db/migrate.ts`
 if (import.meta.main) {
   runMigrations()
-  // eslint-disable-next-line no-console
-  console.log("Migrations applied.")
+  process.stdout.write("Migrations applied.\n")
 }

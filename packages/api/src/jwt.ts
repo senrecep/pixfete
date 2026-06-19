@@ -1,7 +1,7 @@
+import { PixfeteErr } from "@pixfete/shared"
 import { SignJWT, jwtVerify } from "jose"
 import type { Result } from "tsentials/result"
 import { Result as R } from "tsentials/result"
-import { PixfeteErr } from "@pixfete/shared"
 import { config } from "./config"
 
 const ALG = "HS256"
