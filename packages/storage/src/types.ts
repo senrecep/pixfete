@@ -1,5 +1,9 @@
 import type { StorageProvider } from "@pixfete/shared"
 
+export type FetchObjectResult =
+  | { ok: true; value: { body: ReadableStream<Uint8Array> } }
+  | { ok: false }
+
 export interface StorageAdapter {
   // For R2/GDrive: returns presigned upload URL + unique storage key
   // For local: returns null (use chunk upload endpoint)
@@ -18,6 +22,21 @@ export interface StorageAdapter {
 
   // Get storage type identifier
   readonly provider: StorageProvider
+
+  // Stream object bytes through API proxy (required for private providers like GDrive)
+  fetchObject?: (key: string) => Promise<FetchObjectResult>
+
+  // Download object to a local temp path (used by server-side transcode for cloud providers)
+  downloadToPath?: (key: string, destPath: string) => Promise<boolean>
+
+  // Upload a local file to storage. Returns the final storage key on success, null on failure.
+  // For R2 the returned key equals destKey; for GDrive it is the generated Drive file ID.
+  uploadFromPath?: (
+    destKey: string,
+    srcPath: string,
+    mimeType: string,
+    originalKey: string,
+  ) => Promise<string | null>
 }
 
 export interface PrepareUploadOpts {

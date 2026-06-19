@@ -272,9 +272,10 @@ export const uploadRoutes = new Elysia({ prefix: "/api/upload" })
 
     db.update(photos).set({ uploadComplete: true }).where(eq(photos.id, photoId)).run()
 
-    // Local videos: kick off a background transcode to a cross-browser H.264
-    // mp4 + poster (HEVC/.mov otherwise only plays in Safari). Fire-and-forget.
-    if (storageAdapter.provider === "local" && isVideoMime(photo.mimeType)) {
+    // Kick off a background transcode to a cross-browser H.264 mp4 + poster
+    // (HEVC/.mov only plays in Safari without it). Works for all storage providers:
+    // local transcodes in-place; R2/GDrive download→transcode→re-upload. Fire-and-forget.
+    if (isVideoMime(photo.mimeType)) {
       enqueueTranscode(photoId)
     }
 

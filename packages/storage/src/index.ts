@@ -1,4 +1,10 @@
-export type { StorageAdapter, PrepareUploadOpts, PreparedUpload, StorageEnv } from "./types"
+export type {
+  StorageAdapter,
+  PrepareUploadOpts,
+  PreparedUpload,
+  StorageEnv,
+  FetchObjectResult,
+} from "./types"
 export { nameToSlug, sanitizeFileName } from "./pathUtils"
 export { LocalStorageAdapter } from "./adapters/local"
 export type { LocalStorageConfig } from "./adapters/local"

@@ -1,4 +1,4 @@
-import { mkdir, rm, stat } from "node:fs/promises"
+import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises"
 import { dirname, normalize, resolve } from "node:path"
 import type { AppSettingsInput, StorageProvider } from "@pixfete/shared"
 import { PixfeteErr } from "@pixfete/shared"
@@ -39,6 +39,22 @@ export interface StorageAdapter {
    * Response whose body is piped to the client.
    */
   fetchObject?(storageKey: string): Promise<Result<Response>>
+  /**
+   * Downloads an object from storage to a local file path. Used by the
+   * transcode pipeline for cloud providers (R2, GDrive) to fetch video files
+   * before running FFmpeg locally, then re-uploading the result.
+   */
+  downloadToPath?(storageKey: string, destPath: string): Promise<boolean>
+  /**
+   * Uploads a local file to storage under destKey and returns the final
+   * storage key (may differ from destKey for GDrive which uses file IDs).
+   */
+  uploadFromPath?(
+    destKey: string,
+    srcPath: string,
+    mimeType: string,
+    originalKey: string,
+  ): Promise<string | null>
   /**
    * Optional fire-and-forget pre-warm. Lets a provider pay one-time cold-start
    * costs (SDK import, auth, base folder lookup) at boot instead of on the first
@@ -276,6 +292,50 @@ class R2StorageAdapter implements StorageAdapter {
       return R.failure(PixfeteErr.storageFailed(e instanceof Error ? e.message : String(e)))
     }
   }
+
+  async downloadToPath(storageKey: string, destPath: string): Promise<boolean> {
+    try {
+      const { s3, sdk } = await this.client()
+      const GetObjectCommand = sdk.GetObjectCommand as new (opts: unknown) => unknown
+      const send = (s3 as { send: (cmd: unknown) => Promise<unknown> }).send.bind(s3)
+      const obj = (await send(new GetObjectCommand({ Bucket: this.bucket, Key: storageKey }))) as {
+        Body?: { transformToByteArray(): Promise<Uint8Array> }
+      }
+      if (!obj?.Body) return false
+      const bytes = await obj.Body.transformToByteArray().catch(() => null)
+      if (!bytes) return false
+      await writeFile(destPath, bytes)
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  async uploadFromPath(
+    destKey: string,
+    srcPath: string,
+    mimeType: string,
+    _originalKey: string,
+  ): Promise<string | null> {
+    try {
+      const bytes = await readFile(srcPath).catch(() => null)
+      if (!bytes) return null
+      const { s3, sdk } = await this.client()
+      const PutObjectCommand = sdk.PutObjectCommand as new (opts: unknown) => unknown
+      const send = (s3 as { send: (cmd: unknown) => Promise<unknown> }).send.bind(s3)
+      await send(
+        new PutObjectCommand({
+          Bucket: this.bucket,
+          Key: destKey,
+          Body: bytes,
+          ContentType: mimeType,
+        }),
+      )
+      return destKey
+    } catch {
+      return null
+    }
+  }
 }
 
 // ── Google Drive adapter ──────────────────────────────────────────────────────
@@ -500,6 +560,53 @@ class GDriveStorageAdapter implements StorageAdapter {
       return R.ok()
     } catch (e) {
       return R.failure(PixfeteErr.storageFailed(e instanceof Error ? e.message : String(e)))
+    }
+  }
+
+  async downloadToPath(storageKey: string, destPath: string): Promise<boolean> {
+    const result = await this.fetchObject(storageKey)
+    if (!result.ok) return false
+    const bytes = await result.value.arrayBuffer().catch(() => null)
+    if (!bytes) return false
+    return writeFile(destPath, Buffer.from(bytes))
+      .then(() => true)
+      .catch(() => false)
+  }
+
+  async uploadFromPath(
+    destKey: string,
+    srcPath: string,
+    mimeType: string,
+    originalKey: string,
+  ): Promise<string | null> {
+    if (originalKey.startsWith("pending:")) return null
+    try {
+      const drive = await this.getDrive()
+      const d = drive as {
+        files: {
+          get(opts: unknown): Promise<{ data: { parents?: string[] } }>
+          create(opts: unknown): Promise<{ data: { id?: string } }>
+        }
+      }
+      const original = await d.files
+        .get({ fileId: originalKey, fields: "parents", supportsAllDrives: true })
+        .catch(() => null)
+      const parentId = original?.data.parents?.[0]
+      if (!parentId) return null
+      const bytes = await readFile(srcPath).catch(() => null)
+      if (!bytes) return null
+      const fileName = destKey.split("/").pop() ?? destKey
+      const created = await d.files
+        .create({
+          requestBody: { name: fileName, parents: [parentId] },
+          media: { mimeType, body: bytes },
+          supportsAllDrives: true,
+          fields: "id",
+        })
+        .catch(() => null)
+      return created?.data.id ?? null
+    } catch {
+      return null
     }
   }
 }

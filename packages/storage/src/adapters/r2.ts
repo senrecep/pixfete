@@ -1,14 +1,16 @@
+import { readFile, writeFile } from "node:fs/promises"
 import {
-  S3Client,
-  HeadObjectCommand,
   DeleteObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
   PutObjectCommand,
+  S3Client,
 } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { PRESIGNED_URL_EXPIRY_SECONDS } from "@pixfete/shared"
 import type { StorageProvider } from "@pixfete/shared"
-import type { StorageAdapter, PrepareUploadOpts, PreparedUpload } from "../types"
 import { nameToSlug } from "../pathUtils"
+import type { PrepareUploadOpts, PreparedUpload, StorageAdapter } from "../types"
 
 export interface R2StorageConfig {
   endpoint: string
@@ -80,5 +82,41 @@ export class R2StorageAdapter implements StorageAdapter {
 
   async deleteFile(key: string): Promise<void> {
     await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }))
+  }
+
+  async downloadToPath(key: string, destPath: string): Promise<boolean> {
+    const obj = await this.client
+      .send(new GetObjectCommand({ Bucket: this.bucket, Key: key }))
+      .catch(() => null)
+    if (!obj?.Body) return false
+    const bytes = await (obj.Body as { transformToByteArray(): Promise<Uint8Array> })
+      .transformToByteArray()
+      .catch(() => null)
+    if (!bytes) return false
+    return writeFile(destPath, bytes)
+      .then(() => true)
+      .catch(() => false)
+  }
+
+  async uploadFromPath(
+    destKey: string,
+    srcPath: string,
+    mimeType: string,
+    _originalKey: string,
+  ): Promise<string | null> {
+    const bytes = await readFile(srcPath).catch(() => null)
+    if (!bytes) return null
+    const ok = await this.client
+      .send(
+        new PutObjectCommand({
+          Bucket: this.bucket,
+          Key: destKey,
+          Body: bytes,
+          ContentType: mimeType,
+        }),
+      )
+      .then(() => true)
+      .catch(() => false)
+    return ok ? destKey : null
   }
 }

@@ -1,8 +1,9 @@
-import { google, type Auth } from "googleapis"
+import { readFile, writeFile } from "node:fs/promises"
 import { PRESIGNED_URL_EXPIRY_SECONDS } from "@pixfete/shared"
 import type { StorageProvider } from "@pixfete/shared"
-import type { StorageAdapter, PrepareUploadOpts, PreparedUpload } from "../types"
+import { type Auth, google } from "googleapis"
 import { nameToSlug } from "../pathUtils"
+import type { FetchObjectResult, PrepareUploadOpts, PreparedUpload, StorageAdapter } from "../types"
 
 export interface GoogleDriveConfig {
   serviceAccountJson: string
@@ -149,5 +150,58 @@ export class GoogleDriveAdapter implements StorageAdapter {
     if (key.startsWith("pending:")) return
     const drive = this.getDriveClient()
     await drive.files.delete({ fileId: key, supportsAllDrives: true })
+  }
+
+  async downloadToPath(key: string, destPath: string): Promise<boolean> {
+    const result = await this.fetchObject(key)
+    if (!result.ok) return false
+    const bytes = await new Response(result.value.body).arrayBuffer().catch(() => null)
+    if (!bytes) return false
+    return writeFile(destPath, Buffer.from(bytes))
+      .then(() => true)
+      .catch(() => false)
+  }
+
+  async uploadFromPath(
+    destKey: string,
+    srcPath: string,
+    mimeType: string,
+    originalKey: string,
+  ): Promise<string | null> {
+    if (originalKey.startsWith("pending:")) return null
+    const drive = this.getDriveClient()
+
+    // Find the folder that holds the original file so the transcoded version lands alongside it.
+    const original = await drive.files
+      .get({ fileId: originalKey, fields: "parents", supportsAllDrives: true })
+      .catch(() => null)
+    const parentId = original?.data.parents?.[0]
+    if (!parentId) return null
+
+    const bytes = await readFile(srcPath).catch(() => null)
+    if (!bytes) return null
+
+    const fileName = destKey.split("/").pop() ?? destKey
+    const created = await drive.files
+      .create({
+        requestBody: { name: fileName, parents: [parentId] },
+        media: { mimeType, body: bytes },
+        supportsAllDrives: true,
+        fields: "id",
+      })
+      .catch(() => null)
+    return created?.data.id ?? null
+  }
+
+  async fetchObject(key: string): Promise<FetchObjectResult> {
+    if (key.startsWith("pending:")) return { ok: false }
+    const accessToken = await this.getAccessToken().catch(() => null)
+    if (!accessToken) return { ok: false }
+    const res = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(key)}?alt=media&supportsAllDrives=true`,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    ).catch(() => null)
+    if (!res?.ok || !res.body) return { ok: false }
+    return { ok: true, value: { body: res.body } }
   }
 }
