@@ -9,6 +9,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@pixfete/shared": "workspace:*",
     "@react-pdf/renderer": "^4.1.6",
     "@types/qrcode": "^1.5.5",

@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui/Spinner"
 import { DropZone } from "@/components/upload/DropZone"
 import { FilePreview } from "@/components/upload/FilePreview"
 import { type UploadItem, UploadProgress } from "@/components/upload/UploadProgress"
+import { VideoProcessCard } from "@/components/upload/VideoProcessCard"
 import { WhatsAppSendHelper } from "@/components/whatsapp/WhatsAppSendHelper"
 import { useApiError } from "@/hooks/useApiError"
 import { useWakeLock } from "@/hooks/useWakeLock"
@@ -82,6 +83,7 @@ export default function UploadPage() {
 
   const [files, setFiles] = useState<SelectedFile[]>([])
   const [uploadItems, setUploadItems] = useState<UploadItem[]>([])
+  const [pendingVideo, setPendingVideo] = useState<File | null>(null)
 
   // Upload plan + completion set live in refs so the visibility handler can
   // re-drive uploads after an interruption without stale closures.
@@ -184,13 +186,25 @@ export default function UploadPage() {
   }
 
   const addFiles = (incoming: File[]) => {
+    const videos = incoming.filter((f) => f.type.startsWith("video/"))
+    const nonVideos = incoming.filter((f) => !f.type.startsWith("video/"))
+
+    if (videos.length > 0) {
+      setPendingVideo(videos[0] ?? null)
+      if (videos.length > 1) {
+        toast.error("Aynı anda yalnızca bir video işlenebilir")
+      }
+    }
+
+    if (nonVideos.length === 0) return
+
     setFiles((prev) => {
       const space = maxFiles - prev.length
       if (space <= 0) {
         toast.error(interp(t.upload.select.tooMany, { max: maxFiles }))
         return prev
       }
-      const accepted = incoming.slice(0, space).map<SelectedFile>((file) => {
+      const accepted = nonVideos.slice(0, space).map<SelectedFile>((file) => {
         const errCode = getValidationCode(file, maxFileSize)
         return {
           id: makeId(),
@@ -198,12 +212,55 @@ export default function UploadPage() {
           error: errCode ? te(errCode, { max: upload.maxFileSizeMb }) : undefined,
         }
       })
-      if (incoming.length > space) {
+      if (nonVideos.length > space) {
         toast.error(interp(t.upload.select.onlyNMore, { n: space }))
       }
       return [...prev, ...accepted]
     })
   }
+
+  const handleVideoProcessed = useCallback(
+    (processed: File) => {
+      setPendingVideo(null)
+      setFiles((prev) => {
+        const space = maxFiles - prev.length
+        if (space <= 0) return prev
+        const errCode = getValidationCode(processed, maxFileSize)
+        return [
+          ...prev,
+          {
+            id: makeId(),
+            file: processed,
+            error: errCode ? te(errCode, { max: upload.maxFileSizeMb }) : undefined,
+          },
+        ]
+      })
+    },
+    [maxFiles, maxFileSize, te, upload.maxFileSizeMb],
+  )
+
+  const handleVideoSkip = useCallback(() => {
+    if (!pendingVideo) return
+    const file = pendingVideo
+    setPendingVideo(null)
+    setFiles((prev) => {
+      const space = maxFiles - prev.length
+      if (space <= 0) return prev
+      const errCode = getValidationCode(file, maxFileSize)
+      return [
+        ...prev,
+        {
+          id: makeId(),
+          file,
+          error: errCode ? te(errCode, { max: upload.maxFileSizeMb }) : undefined,
+        },
+      ]
+    })
+  }, [pendingVideo, maxFiles, maxFileSize, te, upload.maxFileSizeMb])
+
+  const handleVideoCancel = useCallback(() => {
+    setPendingVideo(null)
+  }, [])
 
   const removeFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id))
@@ -588,6 +645,14 @@ export default function UploadPage() {
           </>
         )}
       </main>
+      {pendingVideo ? (
+        <VideoProcessCard
+          file={pendingVideo}
+          onProcessed={handleVideoProcessed}
+          onSkip={handleVideoSkip}
+          onCancel={handleVideoCancel}
+        />
+      ) : null}
     </>
   )
 }
