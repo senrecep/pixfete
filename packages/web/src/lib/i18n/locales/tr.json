@@ -117,6 +117,13 @@
         "trimBtn": "Kes ve Yükle",
         "skipBtn": "Değiştirmeden Yükle",
         "cancelBtn": "İptal"
+      },
+      "imageCrop": {
+        "title": "Fotoğrafı Kırp",
+        "closeLabel": "Kapat",
+        "cropBtn": "Kırp ve Yükle",
+        "skipBtn": "Olduğu Gibi Yükle",
+        "cancelBtn": "İptal"
       }
     },
     "gallery": {
@@ -396,7 +403,8 @@
       "yandex": "Yandex Haritalar"
     },
     "filePreview": {
-      "removeLabel": "{name} dosyasını kaldır"
+      "removeLabel": "{name} dosyasını kaldır",
+      "editLabel": "{name} düzenle"
     },
     "status": {
       "pending": "Onay Bekliyor",

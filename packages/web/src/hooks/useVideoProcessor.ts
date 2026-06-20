@@ -75,7 +75,10 @@ export function useVideoProcessor() {
 
     // Guard against worker init deadlock: terminate + return null after 60 s
     const loaded = await Promise.race([
-      ff.load(loadOpts).then(() => true as const, () => false as const),
+      ff.load(loadOpts).then(
+        () => true as const,
+        () => false as const,
+      ),
       new Promise<"timeout">((resolve) => setTimeout(() => resolve("timeout"), 60_000)),
     ])
 

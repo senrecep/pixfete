@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input"
 import { Spinner } from "@/components/ui/Spinner"
 import { DropZone } from "@/components/upload/DropZone"
 import { FilePreview } from "@/components/upload/FilePreview"
+import { ImageCropCard } from "@/components/upload/ImageCropCard"
 import { type UploadItem, UploadProgress } from "@/components/upload/UploadProgress"
 import { VideoProcessCard } from "@/components/upload/VideoProcessCard"
 import { WhatsAppSendHelper } from "@/components/whatsapp/WhatsAppSendHelper"
@@ -40,6 +41,7 @@ type Step = "identity" | "select" | "uploading" | "success"
 interface SelectedFile {
   id: string
   file: File
+  meta?: { width?: number; height?: number; duration?: number }
   error?: string | undefined
 }
 
@@ -83,7 +85,8 @@ export default function UploadPage() {
 
   const [files, setFiles] = useState<SelectedFile[]>([])
   const [uploadItems, setUploadItems] = useState<UploadItem[]>([])
-  const [pendingVideo, setPendingVideo] = useState<File | null>(null)
+  const [editingFileId, setEditingFileId] = useState<string | null>(null)
+  const metaLoadedRef = useRef<Set<string>>(new Set())
 
   // Upload plan + completion set live in refs so the visibility handler can
   // re-drive uploads after an interruption without stale closures.
@@ -186,83 +189,64 @@ export default function UploadPage() {
   }
 
   const addFiles = (incoming: File[]) => {
-    const videos = incoming.filter((f) => f.type.startsWith("video/"))
-    const nonVideos = incoming.filter((f) => !f.type.startsWith("video/"))
-
-    if (videos.length > 0) {
-      setPendingVideo(videos[0] ?? null)
-      if (videos.length > 1) {
-        toast.error("Aynı anda yalnızca bir video işlenebilir")
-      }
-    }
-
-    if (nonVideos.length === 0) return
-
     setFiles((prev) => {
       const space = maxFiles - prev.length
       if (space <= 0) {
         toast.error(interp(t.upload.select.tooMany, { max: maxFiles }))
         return prev
       }
-      const accepted = nonVideos.slice(0, space).map<SelectedFile>((file) => {
-        const errCode = getValidationCode(file, maxFileSize)
-        return {
-          id: makeId(),
-          file,
-          error: errCode ? te(errCode, { max: upload.maxFileSizeMb }) : undefined,
-        }
-      })
-      if (nonVideos.length > space) {
+      const toAdd = incoming.slice(0, space)
+      if (incoming.length > space) {
         toast.error(interp(t.upload.select.onlyNMore, { n: space }))
       }
-      return [...prev, ...accepted]
+      return [
+        ...prev,
+        ...toAdd.map<SelectedFile>((file) => {
+          const errCode = getValidationCode(file, maxFileSize)
+          return {
+            id: makeId(),
+            file,
+            error: errCode ? te(errCode, { max: upload.maxFileSizeMb }) : undefined,
+          }
+        }),
+      ]
     })
   }
 
-  const handleVideoProcessed = useCallback(
-    (processed: File) => {
-      setPendingVideo(null)
-      setFiles((prev) => {
-        const space = maxFiles - prev.length
-        if (space <= 0) return prev
-        const errCode = getValidationCode(processed, maxFileSize)
-        return [
-          ...prev,
-          {
-            id: makeId(),
-            file: processed,
-            error: errCode ? te(errCode, { max: upload.maxFileSizeMb }) : undefined,
-          },
-        ]
+  // Load dimensions/duration for any file that hasn't been processed yet
+  useEffect(() => {
+    const toLoad = files.filter((sf) => !metaLoadedRef.current.has(sf.id))
+    if (toLoad.length === 0) return
+    for (const sf of toLoad) {
+      metaLoadedRef.current.add(sf.id)
+      readMediaDimensions(sf.file).then((dims) => {
+        if (!dims) return
+        setFiles((curr) => curr.map((f) => (f.id === sf.id ? { ...f, meta: dims } : f)))
       })
+    }
+  }, [files])
+
+  const handleFileEdited = useCallback(
+    (id: string, newFile: File) => {
+      metaLoadedRef.current.delete(id)
+      setEditingFileId(null)
+      setFiles((prev) =>
+        prev.map((sf) => {
+          if (sf.id !== id) return sf
+          const errCode = getValidationCode(newFile, maxFileSize)
+          return {
+            id: sf.id,
+            file: newFile,
+            error: errCode ? te(errCode, { max: upload.maxFileSizeMb }) : undefined,
+          }
+        }),
+      )
     },
-    [maxFiles, maxFileSize, te, upload.maxFileSizeMb],
+    [maxFileSize, te, upload.maxFileSizeMb],
   )
 
-  const handleVideoSkip = useCallback(() => {
-    if (!pendingVideo) return
-    const file = pendingVideo
-    setPendingVideo(null)
-    setFiles((prev) => {
-      const space = maxFiles - prev.length
-      if (space <= 0) return prev
-      const errCode = getValidationCode(file, maxFileSize)
-      return [
-        ...prev,
-        {
-          id: makeId(),
-          file,
-          error: errCode ? te(errCode, { max: upload.maxFileSizeMb }) : undefined,
-        },
-      ]
-    })
-  }, [pendingVideo, maxFiles, maxFileSize, te, upload.maxFileSizeMb])
-
-  const handleVideoCancel = useCallback(() => {
-    setPendingVideo(null)
-  }, [])
-
   const removeFile = (id: string) => {
+    metaLoadedRef.current.delete(id)
     setFiles((prev) => prev.filter((f) => f.id !== id))
   }
 
@@ -520,8 +504,10 @@ export default function UploadPage() {
                       <FilePreview
                         key={sf.id}
                         file={sf.file}
+                        meta={sf.meta}
                         error={sf.error}
                         onRemove={() => removeFile(sf.id)}
+                        onEdit={() => setEditingFileId(sf.id)}
                       />
                     ))}
                   </div>
@@ -645,14 +631,30 @@ export default function UploadPage() {
           </>
         )}
       </main>
-      {pendingVideo ? (
-        <VideoProcessCard
-          file={pendingVideo}
-          onProcessed={handleVideoProcessed}
-          onSkip={handleVideoSkip}
-          onCancel={handleVideoCancel}
-        />
-      ) : null}
+      {editingFileId
+        ? (() => {
+            const sf = files.find((f) => f.id === editingFileId)
+            if (!sf) return null
+            if (sf.file.type.startsWith("video/")) {
+              return (
+                <VideoProcessCard
+                  file={sf.file}
+                  onProcessed={(newFile) => handleFileEdited(editingFileId, newFile)}
+                  onSkip={() => setEditingFileId(null)}
+                  onCancel={() => setEditingFileId(null)}
+                />
+              )
+            }
+            return (
+              <ImageCropCard
+                file={sf.file}
+                onCropped={(newFile) => handleFileEdited(editingFileId, newFile)}
+                onSkip={() => setEditingFileId(null)}
+                onCancel={() => setEditingFileId(null)}
+              />
+            )
+          })()
+        : null}
     </>
   )
 }

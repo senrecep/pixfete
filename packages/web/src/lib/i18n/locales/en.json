@@ -117,6 +117,13 @@
         "trimBtn": "Cut and Upload",
         "skipBtn": "Upload without changes",
         "cancelBtn": "Cancel"
+      },
+      "imageCrop": {
+        "title": "Crop Photo",
+        "closeLabel": "Close",
+        "cropBtn": "Crop and Upload",
+        "skipBtn": "Upload Original",
+        "cancelBtn": "Cancel"
       }
     },
     "gallery": {
@@ -396,7 +403,8 @@
       "yandex": "Yandex Maps"
     },
     "filePreview": {
-      "removeLabel": "Remove {name}"
+      "removeLabel": "Remove {name}",
+      "editLabel": "Edit {name}"
     },
     "status": {
       "pending": "Pending",

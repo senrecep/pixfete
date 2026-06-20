@@ -14,7 +14,9 @@ export function formatBytes(bytes: number, decimals = 1): string {
   return `${value.toFixed(value < 10 && i > 0 ? decimals : 0)} ${sizes[i]}`
 }
 
-export function readMediaDimensions(file: File): Promise<{ width: number; height: number } | null> {
+export function readMediaDimensions(
+  file: File,
+): Promise<{ width: number; height: number; duration?: number } | null> {
   return new Promise((resolve) => {
     const url = URL.createObjectURL(file)
 
@@ -37,7 +39,7 @@ export function readMediaDimensions(file: File): Promise<{ width: number; height
       video.preload = "metadata"
       video.onloadedmetadata = () => {
         URL.revokeObjectURL(url)
-        resolve({ width: video.videoWidth, height: video.videoHeight })
+        resolve({ width: video.videoWidth, height: video.videoHeight, duration: video.duration })
       }
       video.onerror = () => {
         URL.revokeObjectURL(url)

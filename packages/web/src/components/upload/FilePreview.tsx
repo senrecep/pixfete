@@ -5,16 +5,30 @@ import { interp } from "@/lib/i18n"
 import { mediaFormatLabel } from "@/lib/photo"
 import { formatBytes } from "@/lib/utils"
 import { useI18n } from "@/providers/I18nProvider"
-import { Play, X } from "lucide-react"
+import { Pencil, Play, X } from "lucide-react"
 import { useEffect, useState } from "react"
+
+interface FileMeta {
+  width?: number
+  height?: number
+  duration?: number
+}
 
 interface FilePreviewProps {
   file: File
   onRemove: () => void
+  onEdit?: () => void
+  meta?: FileMeta | undefined
   error?: string | undefined
 }
 
-export function FilePreview({ file, onRemove, error }: FilePreviewProps) {
+function formatDuration(sec: number): string {
+  const m = Math.floor(sec / 60)
+  const s = Math.floor(sec % 60)
+  return m > 0 ? `${m}:${String(s).padStart(2, "0")}` : `${s}s`
+}
+
+export function FilePreview({ file, onRemove, onEdit, meta, error }: FilePreviewProps) {
   const { t } = useI18n()
   const [thumb, setThumb] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
@@ -26,6 +40,18 @@ export function FilePreview({ file, onRemove, error }: FilePreviewProps) {
   }, [file])
 
   const isVideo = file.type.startsWith("video/")
+
+  const metaLine = (() => {
+    if (!meta) return formatBytes(file.size)
+    const parts: string[] = []
+    if (isVideo && meta.duration !== undefined && meta.duration > 0) {
+      parts.push(formatDuration(meta.duration))
+    } else if (!isVideo && meta.width && meta.height) {
+      parts.push(`${meta.width}×${meta.height}`)
+    }
+    parts.push(formatBytes(file.size))
+    return parts.join(" · ")
+  })()
 
   return (
     <div className="flex items-center gap-3 rounded-xl border border-accent-soft bg-white p-3">
@@ -67,9 +93,19 @@ export function FilePreview({ file, onRemove, error }: FilePreviewProps) {
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-ink">{file.name}</p>
-        <p className="text-xs text-ink/50">{formatBytes(file.size)}</p>
+        <p className="text-xs text-ink/50">{metaLine}</p>
         {error ? <p className="text-xs text-red-500">{error}</p> : null}
       </div>
+      {onEdit ? (
+        <button
+          type="button"
+          onClick={onEdit}
+          aria-label={interp(t.filePreview.editLabel, { name: file.name })}
+          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-ink/40 transition-colors hover:bg-accent-soft hover:text-accent-dark"
+        >
+          <Pencil className="h-4 w-4" />
+        </button>
+      ) : null}
       <button
         type="button"
         onClick={onRemove}

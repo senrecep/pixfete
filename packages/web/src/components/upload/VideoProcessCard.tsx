@@ -103,9 +103,7 @@ export function VideoProcessCard({ file, onProcessed, onSkip, onCancel }: VideoP
             {/* Trim section — only shown when video metadata is loaded */}
             {duration > 0 ? (
               <div className="space-y-4 bg-accent-soft/50 rounded-2xl p-4">
-                <p className="text-sm font-semibold text-ink text-center">
-                  {vp.trimQuestion}
-                </p>
+                <p className="text-sm font-semibold text-ink text-center">{vp.trimQuestion}</p>
 
                 {/* Visual timeline bar */}
                 <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
