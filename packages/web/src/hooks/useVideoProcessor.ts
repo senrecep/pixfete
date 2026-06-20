@@ -41,14 +41,24 @@ export function useVideoProcessor() {
     )
 
     // Multi-thread WASM core — requires COOP + COEP headers on /upload (set in next.config.ts).
-    const base = "https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/esm"
-    const loaded = await ff
-      .load({
-        coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
-        wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
-        workerURL: await toBlobURL(`${base}/ffmpeg-core.worker.js`, "text/javascript"),
-      })
-      .catch(() => false as const)
+    // Use multi-thread core only when SharedArrayBuffer is available (requires
+    // COOP/COEP headers). Fall back to single-thread core otherwise — slower
+    // but works on any host without special header configuration.
+    const useMt = typeof crossOriginIsolated !== "undefined" && crossOriginIsolated
+    const base = useMt
+      ? "https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/esm"
+      : "https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm"
+    const loadOpts = useMt
+      ? {
+          coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
+          wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
+          workerURL: await toBlobURL(`${base}/ffmpeg-core.worker.js`, "text/javascript"),
+        }
+      : {
+          coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
+          wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
+        }
+    const loaded = await ff.load(loadOpts).catch(() => false as const)
 
     if (loaded === false) return null
     ffmpegRef.current = ff
