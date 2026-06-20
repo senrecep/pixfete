@@ -270,7 +270,10 @@ export const uploadRoutes = new Elysia({ prefix: "/api/upload" })
       }
     }
 
-    db.update(photos).set({ uploadComplete: true }).where(eq(photos.id, photoId)).run()
+    db.update(photos)
+      .set({ uploadComplete: true, publicUrl: storageAdapter.getPublicUrl(currentKey) })
+      .where(eq(photos.id, photoId))
+      .run()
 
     // Kick off a background transcode to a cross-browser H.264 mp4 + poster
     // (HEVC/.mov only plays in Safari without it). Works for all storage providers:
@@ -344,7 +347,13 @@ export const uploadRoutes = new Elysia({ prefix: "/api/upload" })
 
     const isLast = chunkIndex >= totalChunks - 1
     if (isLast) {
-      db.update(photos).set({ uploadComplete: true }).where(eq(photos.id, photo.id)).run()
+      db.update(photos)
+        .set({
+          uploadComplete: true,
+          publicUrl: getStorageAdapter().getPublicUrl(photo.storageKey),
+        })
+        .where(eq(photos.id, photo.id))
+        .run()
       track({
         eventType: "upload_complete",
         sessionId: photo.uploaderSessionId,
