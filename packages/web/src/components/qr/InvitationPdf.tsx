@@ -30,51 +30,55 @@ Font.register({
 // Disable hyphenation so Turkish words never split mid-word.
 Font.registerHyphenationCallback((word) => [word])
 
-const styles = StyleSheet.create({
-  // A5 landscape; the card fills the page with a soft padding margin.
-  page: {
-    backgroundColor: "#fdfcfb",
-    padding: 28,
-    fontFamily: "Lato",
-  },
+// StyleSheet.create is static (module-level); dynamic accent colors are applied
+// as inline style merges inside the component: [base.x, { color: accent }].
+const base = StyleSheet.create({
+  page: { backgroundColor: "#fdfcfb", padding: 28, fontFamily: "Lato" },
   card: {
     flex: 1,
-    borderWidth: 2,
-    borderColor: "#c4a5d4",
-    borderRadius: 16,
+    flexDirection: "row",
+    borderWidth: 1.5,
+    borderRadius: 14,
+    overflow: "hidden",
+  },
+  left: {
+    flex: 1,
+    paddingVertical: 36,
+    paddingHorizontal: 38,
+    justifyContent: "center",
+  },
+  welcome: { fontSize: 9, letterSpacing: 3, marginBottom: 16 },
+  names: { fontSize: 38, fontFamily: "Crimson Text", lineHeight: 1.1 },
+  divider: { width: 44, height: 1.5, marginTop: 20, marginBottom: 18 },
+  date: { fontSize: 11 },
+  right: {
+    width: 192,
+    backgroundColor: "#ffffff",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 32,
-    paddingHorizontal: 40,
-    backgroundColor: "#ffffff",
   },
-  welcome: {
-    fontSize: 11,
-    letterSpacing: 3,
-    color: "#9b72aa",
-    marginBottom: 14,
-  },
-  names: {
-    fontSize: 40,
-    color: "#7d5790",
-    fontFamily: "Crimson Text",
-  },
-  divider: {
-    width: 56,
-    height: 1.5,
-    backgroundColor: "#c4a5d4",
-    marginVertical: 16,
-  },
-  qr: {
-    width: 132,
-    height: 132,
-    marginBottom: 16,
-  },
-  date: {
-    fontSize: 12,
-    color: "#2e2a33",
-  },
+  qr: { width: 150, height: 150 },
 })
+
+function hexToRgb(hex: string): [number, number, number] | null {
+  const m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex)
+  if (!m?.[1] || !m[2] || !m[3]) return null
+  return [Number.parseInt(m[1], 16), Number.parseInt(m[2], 16), Number.parseInt(m[3], 16)]
+}
+
+const toHex = (n: number) => n.toString(16).padStart(2, "0")
+
+function lighten(hex: string, t: number): string {
+  const rgb = hexToRgb(hex)
+  if (!rgb) return "#f5f0fa"
+  return `#${toHex(Math.min(255, Math.round(rgb[0] + (255 - rgb[0]) * t)))}${toHex(Math.min(255, Math.round(rgb[1] + (255 - rgb[1]) * t)))}${toHex(Math.min(255, Math.round(rgb[2] + (255 - rgb[2]) * t)))}`
+}
+
+function darken(hex: string, t: number): string {
+  const rgb = hexToRgb(hex)
+  if (!rgb) return "#4a2e60"
+  return `#${toHex(Math.round(rgb[0] * (1 - t)))}${toHex(Math.round(rgb[1] * (1 - t)))}${toHex(Math.round(rgb[2] * (1 - t)))}`
+}
 
 export function InvitationPdf({
   qrDataUrl,
@@ -89,21 +93,31 @@ export function InvitationPdf({
   welcome: string
   locale: Locale
 }) {
+  const accent = event.accentColor || "#9b72aa"
+  const accentLight = lighten(accent, 0.92)
+  const accentDark = darken(accent, 0.15)
   // Locale-aware uppercase: Turkish maps i → İ, English keeps i → I. Using the
   // wrong locale would garble the other language (e.g. "Invitation" → "İNVİTATİON").
   const upperLocale = locale === "tr" ? "tr-TR" : "en-US"
+
   return (
     <Document title={`${event.title} — ${welcome}`}>
-      <Page size="A5" orientation="landscape" style={styles.page}>
-        <View style={styles.card}>
-          <Text style={styles.welcome}>{welcome.toLocaleUpperCase(upperLocale)}</Text>
-          <Text style={styles.names}>{event.title}</Text>
-
-          <View style={styles.divider} />
-
-          {/* eslint-disable-next-line jsx-a11y/alt-text */}
-          <PdfImage src={qrDataUrl} style={styles.qr} />
-          <Text style={styles.date}>{dateLabel}</Text>
+      <Page size="A5" orientation="landscape" style={base.page}>
+        <View style={[base.card, { borderColor: accent }]}>
+          {/* Left: text panel with light accent tint */}
+          <View style={[base.left, { backgroundColor: accentLight }]}>
+            <Text style={[base.welcome, { color: accent }]}>
+              {welcome.toLocaleUpperCase(upperLocale)}
+            </Text>
+            <Text style={[base.names, { color: accentDark }]}>{event.title}</Text>
+            <View style={[base.divider, { backgroundColor: accent }]} />
+            <Text style={[base.date, { color: accentDark }]}>{dateLabel}</Text>
+          </View>
+          {/* Right: QR panel on clean white */}
+          <View style={base.right}>
+            {/* eslint-disable-next-line jsx-a11y/alt-text */}
+            <PdfImage src={qrDataUrl} style={base.qr} />
+          </View>
         </View>
       </Page>
     </Document>

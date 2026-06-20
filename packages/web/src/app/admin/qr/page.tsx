@@ -67,7 +67,7 @@ export default function AdminQrPage() {
     QRCode.toDataURL(SITE_URL, {
       width: 600,
       margin: 1,
-      color: { dark: "#7d5790", light: "#ffffff" },
+      color: { dark: event.accentColor, light: "#ffffff" },
     })
       .then((url) => {
         if (active) setQrDataUrl(url)
@@ -78,7 +78,7 @@ export default function AdminQrPage() {
     return () => {
       active = false
     }
-  }, [t.qr.qrError])
+  }, [t.qr.qrError, event.accentColor])
 
   const downloadPng = () => {
     if (!qrDataUrl) return
