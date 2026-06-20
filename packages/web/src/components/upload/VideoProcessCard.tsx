@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/Button"
 import { ProgressBar } from "@/components/ui/ProgressBar"
 import { useVideoProcessor } from "@/hooks/useVideoProcessor"
 import type { VideoProcessOptions } from "@/hooks/useVideoProcessor"
+import { interp } from "@/lib/i18n"
+import { useI18n } from "@/providers/I18nProvider"
 import { AnimatePresence, motion } from "framer-motion"
 import { Scissors, Upload, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
@@ -16,6 +18,8 @@ interface VideoProcessCardProps {
 }
 
 export function VideoProcessCard({ file, onProcessed, onSkip, onCancel }: VideoProcessCardProps) {
+  const { t } = useI18n()
+  const vp = t.upload.videoProcess
   const { process, state, reset, cancel } = useVideoProcessor()
   const videoRef = useRef<HTMLVideoElement>(null)
   const [objectUrl, setObjectUrl] = useState<string | null>(null)
@@ -68,13 +72,13 @@ export function VideoProcessCard({ file, onProcessed, onSkip, onCancel }: VideoP
           <div className="flex items-center justify-between px-5 pt-5 pb-3">
             <div className="flex items-center gap-2">
               <Scissors className="h-5 w-5 text-accent" />
-              <h2 className="text-base font-semibold text-ink">Videoyu Düzenle</h2>
+              <h2 className="text-base font-semibold text-ink">{vp.title}</h2>
             </div>
             <button
               type="button"
               onClick={onCancel}
               className="rounded-full p-2 text-ink/40 transition-colors hover:bg-accent-soft hover:text-accent-dark cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
-              aria-label="Kapat"
+              aria-label={vp.closeLabel}
             >
               <X className="h-4 w-4" />
             </button>
@@ -91,7 +95,7 @@ export function VideoProcessCard({ file, onProcessed, onSkip, onCancel }: VideoP
                 muted
                 playsInline
                 onLoadedMetadata={handleLoadedMetadata}
-                aria-label={`Video önizleme: ${file.name}`}
+                aria-label={interp(vp.title, { name: file.name })}
                 className="w-full rounded-2xl bg-black aspect-video object-contain"
               />
             ) : null}
@@ -100,7 +104,7 @@ export function VideoProcessCard({ file, onProcessed, onSkip, onCancel }: VideoP
             {duration > 0 ? (
               <div className="space-y-4 bg-accent-soft/50 rounded-2xl p-4">
                 <p className="text-sm font-semibold text-ink text-center">
-                  Hangi kısmını yükleyelim?
+                  {vp.trimQuestion}
                 </p>
 
                 {/* Visual timeline bar */}
@@ -114,14 +118,14 @@ export function VideoProcessCard({ file, onProcessed, onSkip, onCancel }: VideoP
                 {/* Duration indicator */}
                 <p className="text-center text-sm font-medium text-accent">
                   {hasTrim
-                    ? `${selectedDuration.toFixed(0)} saniye seçildi`
-                    : `Tamamı — ${duration.toFixed(0)} saniye`}
+                    ? interp(vp.selectedDuration, { duration: selectedDuration.toFixed(0) })
+                    : interp(vp.fullDuration, { duration: duration.toFixed(0) })}
                 </p>
 
                 {/* Start slider */}
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs text-ink/50">
-                    <label htmlFor="trim-start">Başlangıç</label>
+                    <label htmlFor="trim-start">{vp.startLabel}</label>
                     <span className="tabular-nums font-medium">{trimStart.toFixed(1)}s</span>
                   </div>
                   <input
@@ -141,7 +145,7 @@ export function VideoProcessCard({ file, onProcessed, onSkip, onCancel }: VideoP
                 {/* End slider */}
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs text-ink/50">
-                    <label htmlFor="trim-end">Bitiş</label>
+                    <label htmlFor="trim-end">{vp.endLabel}</label>
                     <span className="tabular-nums font-medium">{trimEnd.toFixed(1)}s</span>
                   </div>
                   <input
@@ -165,7 +169,9 @@ export function VideoProcessCard({ file, onProcessed, onSkip, onCancel }: VideoP
               <div className="space-y-2">
                 <ProgressBar value={state.progress} />
                 <p className="text-center text-sm text-ink/60">
-                  {state.phase === "loading" ? "Hazırlanıyor..." : `İşleniyor %${state.progress}`}
+                  {state.phase === "loading"
+                    ? vp.preparing
+                    : interp(vp.processing, { progress: String(state.progress) })}
                 </p>
               </div>
             ) : null}
@@ -179,7 +185,7 @@ export function VideoProcessCard({ file, onProcessed, onSkip, onCancel }: VideoP
                   onClick={reset}
                   className="mt-1 text-sm font-semibold text-red-700 underline cursor-pointer"
                 >
-                  Tekrar dene
+                  {vp.retryBtn}
                 </button>
               </div>
             ) : null}
@@ -194,7 +200,7 @@ export function VideoProcessCard({ file, onProcessed, onSkip, onCancel }: VideoP
                 className="w-full min-h-[52px] text-base font-semibold rounded-2xl"
               >
                 <Scissors className="h-4 w-4" />
-                {hasTrim ? "Kes ve Yükle" : "İşle ve Yükle"}
+                {hasTrim ? vp.trimBtn : vp.processBtn}
               </Button>
 
               {isProcessing ? (
@@ -203,7 +209,7 @@ export function VideoProcessCard({ file, onProcessed, onSkip, onCancel }: VideoP
                   onClick={cancel}
                   className="w-full min-h-[52px] rounded-2xl"
                 >
-                  İptal
+                  {vp.cancelBtn}
                 </Button>
               ) : (
                 <Button
@@ -213,7 +219,7 @@ export function VideoProcessCard({ file, onProcessed, onSkip, onCancel }: VideoP
                   className="w-full min-h-[52px] rounded-2xl"
                 >
                   <Upload className="h-4 w-4" />
-                  Değiştirmeden Yükle
+                  {vp.skipBtn}
                 </Button>
               )}
             </div>

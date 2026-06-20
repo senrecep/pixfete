@@ -101,7 +101,23 @@
       },
       "sessionCreateError": "Oturum oluşturulamadı, tekrar deneyin",
       "uploadFailedError": "Yükleme başarısız",
-      "prepareFailedError": "Yükleme hazırlanamadı"
+      "prepareFailedError": "Yükleme hazırlanamadı",
+      "videoProcess": {
+        "title": "Videoyu Düzenle",
+        "closeLabel": "Kapat",
+        "trimQuestion": "Hangi kısmını yükleyelim?",
+        "selectedDuration": "{duration} saniye seçildi",
+        "fullDuration": "Tamamı — {duration} saniye",
+        "startLabel": "Başlangıç",
+        "endLabel": "Bitiş",
+        "preparing": "Hazırlanıyor...",
+        "processing": "İşleniyor %{progress}",
+        "retryBtn": "Tekrar dene",
+        "processBtn": "İşle ve Yükle",
+        "trimBtn": "Kes ve Yükle",
+        "skipBtn": "Değiştirmeden Yükle",
+        "cancelBtn": "İptal"
+      }
     },
     "gallery": {
       "eyebrow": "Anılarımız",

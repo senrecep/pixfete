@@ -101,7 +101,23 @@
       },
       "sessionCreateError": "Could not create session, please try again",
       "uploadFailedError": "Upload failed",
-      "prepareFailedError": "Could not prepare upload"
+      "prepareFailedError": "Could not prepare upload",
+      "videoProcess": {
+        "title": "Edit Video",
+        "closeLabel": "Close",
+        "trimQuestion": "Which part should we upload?",
+        "selectedDuration": "{duration} seconds selected",
+        "fullDuration": "All — {duration} seconds",
+        "startLabel": "Start",
+        "endLabel": "End",
+        "preparing": "Preparing...",
+        "processing": "Processing {progress}%",
+        "retryBtn": "Try again",
+        "processBtn": "Process and Upload",
+        "trimBtn": "Cut and Upload",
+        "skipBtn": "Upload without changes",
+        "cancelBtn": "Cancel"
+      }
     },
     "gallery": {
       "eyebrow": "Our Memories",
