@@ -45,9 +45,12 @@ export function useVideoProcessor() {
     // COOP/COEP headers). Fall back to single-thread core otherwise — slower
     // but works on any host without special header configuration.
     const useMt = typeof crossOriginIsolated !== "undefined" && crossOriginIsolated
+    // core-mt (multi-thread): ESM worker uses import(), so /esm/ is correct.
+    // core (single-thread): bundled worker uses importScripts(), so must be /umd/.
+    // Version 0.12.9 matches the default baked into @ffmpeg/ffmpeg@0.12.15 worker.
     const base = useMt
       ? "https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/esm"
-      : "https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm"
+      : "https://unpkg.com/@ffmpeg/core@0.12.9/dist/umd"
 
     // Fetch all blob URLs in parallel — wasm is 32 MB so sequential fetching is slow
     let loadOpts: { coreURL: string; wasmURL: string; workerURL?: string }
