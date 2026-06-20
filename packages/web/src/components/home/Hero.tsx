@@ -186,7 +186,7 @@ export function Hero() {
       >
         <p className="mb-4 text-sm tracking-widest text-ink/50 uppercase">{t.home.shareLabel}</p>
         <div className="rounded-3xl border border-accent-soft bg-white p-5 shadow-sm">
-          <QrInline value={SITE_URL} size={150} className="rounded-xl" />
+          <QrInline value={SITE_URL} size={150} className="rounded-xl" color={event.accentColor} />
         </div>
         {/* Download (PNG/PDF) is admin-only at /admin/qr — guests only scan here. */}
       </motion.div>

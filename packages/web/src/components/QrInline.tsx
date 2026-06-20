@@ -9,10 +9,11 @@ interface QrInlineProps {
   value: string
   size?: number
   className?: string
+  color?: string
 }
 
 // Renders a QR code as a data-URL <img>. Client-only (uses canvas via qrcode lib).
-export function QrInline({ value, size = 160, className }: QrInlineProps) {
+export function QrInline({ value, size = 160, className, color = "#7d5790" }: QrInlineProps) {
   const { t } = useI18n()
   const [dataUrl, setDataUrl] = useState<string | null>(null)
 
@@ -21,7 +22,7 @@ export function QrInline({ value, size = 160, className }: QrInlineProps) {
     QRCode.toDataURL(value, {
       width: size,
       margin: 1,
-      color: { dark: "#7d5790", light: "#ffffff" },
+      color: { dark: color, light: "#ffffff" },
     })
       .then((url) => {
         if (active) setDataUrl(url)
@@ -32,7 +33,7 @@ export function QrInline({ value, size = 160, className }: QrInlineProps) {
     return () => {
       active = false
     }
-  }, [value, size])
+  }, [value, size, color])
 
   if (!dataUrl) {
     return (

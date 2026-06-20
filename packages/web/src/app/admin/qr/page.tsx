@@ -149,7 +149,12 @@ export default function AdminQrPage() {
         <section className="overflow-hidden rounded-3xl border border-accent-soft bg-white shadow-sm">
           <div className="flex flex-col items-center bg-gradient-to-b from-accent-soft/40 to-white px-8 pt-10 pb-8">
             <div className="rounded-2xl border border-accent-soft bg-white p-5 shadow-sm">
-              <QrInline value={SITE_URL} size={240} className="rounded-lg" />
+              <QrInline
+                value={SITE_URL}
+                size={240}
+                className="rounded-lg"
+                color={event.accentColor}
+              />
             </div>
             <p className="mt-6 font-display text-3xl text-accent-dark">{event.title}</p>
             <div className="mt-2 inline-flex max-w-full items-center gap-2 rounded-full bg-accent-soft/60 px-3 py-1">
