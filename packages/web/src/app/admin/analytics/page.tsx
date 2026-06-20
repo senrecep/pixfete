@@ -10,9 +10,11 @@ import type { AnalyticsResponse, PaginatedUploaders } from "@/lib/types"
 import { formatBytes } from "@/lib/utils"
 import { useI18n } from "@/providers/I18nProvider"
 import { format } from "date-fns"
-import { Activity, Network, Users } from "lucide-react"
+import { Activity, ChevronLeft, ChevronRight, Network, Users } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
+
+const EVENTS_PAGE_SIZE = 25
 
 function toEpoch(value: string): number | undefined {
   if (!value) return undefined
@@ -30,17 +32,18 @@ export default function AnalyticsPage() {
   const [from, setFrom] = useState("")
   const [to, setTo] = useState("")
   const [eventType, setEventType] = useState("")
+  const [eventsPage, setEventsPage] = useState(1)
 
   const load = useCallback(
-    async (filters: { from: string; to: string; eventType: string }) => {
+    async (filters: { from: string; to: string; eventType: string; eventsPage: number }) => {
       setLoading(true)
       try {
         const fromEpoch = toEpoch(filters.from)
         const toEpochValue = toEpoch(filters.to)
         const [analyticsRes, uploadersRes] = await Promise.all([
           api.admin.getAnalytics({
-            page: 1,
-            limit: 100,
+            page: filters.eventsPage,
+            limit: EVENTS_PAGE_SIZE,
             ...(fromEpoch !== undefined ? { from: fromEpoch } : {}),
             ...(toEpochValue !== undefined ? { to: toEpochValue } : {}),
             ...(filters.eventType ? { eventType: filters.eventType } : {}),
@@ -60,7 +63,7 @@ export default function AnalyticsPage() {
   )
 
   useEffect(() => {
-    void load({ from: "", to: "", eventType: "" })
+    void load({ from: "", to: "", eventType: "", eventsPage: 1 })
   }, [load])
 
   const maxDayCount = useMemo(() => {
@@ -98,7 +101,13 @@ export default function AnalyticsPage() {
             onChange={(e) => setEventType(e.target.value)}
           />
         </div>
-        <Button onClick={() => void load({ from, to, eventType })} loading={loading}>
+        <Button
+          onClick={() => {
+            setEventsPage(1)
+            void load({ from, to, eventType, eventsPage: 1 })
+          }}
+          loading={loading}
+        >
           {a.filterBtn}
         </Button>
       </div>
@@ -253,6 +262,43 @@ export default function AnalyticsPage() {
                 </tbody>
               </table>
             </div>
+            {(() => {
+              const totalPages = Math.ceil(analytics.total / EVENTS_PAGE_SIZE)
+              if (totalPages <= 1) return null
+              return (
+                <div className="mt-5 flex items-center justify-center gap-4">
+                  <button
+                    type="button"
+                    disabled={eventsPage <= 1 || loading}
+                    onClick={() => {
+                      const p = eventsPage - 1
+                      setEventsPage(p)
+                      void load({ from, to, eventType, eventsPage: p })
+                    }}
+                    className="flex min-h-11 items-center gap-1 rounded-full border border-accent-light/50 bg-white px-4 py-2 text-sm text-accent-dark disabled:opacity-40"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    {a.prev}
+                  </button>
+                  <span className="text-sm text-ink/50">
+                    {interp(a.eventsPage, { page: eventsPage, total: totalPages })}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={eventsPage >= totalPages || loading}
+                    onClick={() => {
+                      const p = eventsPage + 1
+                      setEventsPage(p)
+                      void load({ from, to, eventType, eventsPage: p })
+                    }}
+                    className="flex min-h-11 items-center gap-1 rounded-full border border-accent-light/50 bg-white px-4 py-2 text-sm text-accent-dark disabled:opacity-40"
+                  >
+                    {a.next}
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              )
+            })()}
           </section>
         </>
       )}

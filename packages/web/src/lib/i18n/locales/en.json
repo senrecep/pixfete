@@ -385,7 +385,10 @@
         "colEvent": "Event",
         "colIp": "IP",
         "colTime": "Time",
-        "noEvents": "No events recorded."
+        "noEvents": "No events recorded.",
+        "prev": "Previous",
+        "next": "Next",
+        "eventsPage": "{page} / {total}"
       }
     },
     "notFound": {

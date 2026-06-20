@@ -385,7 +385,10 @@
         "colEvent": "Olay",
         "colIp": "IP",
         "colTime": "Zaman",
-        "noEvents": "Olay kaydı yok."
+        "noEvents": "Olay kaydı yok.",
+        "prev": "Önceki",
+        "next": "Sonraki",
+        "eventsPage": "{page} / {total}"
       }
     },
     "notFound": {
