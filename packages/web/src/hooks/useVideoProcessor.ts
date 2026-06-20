@@ -48,19 +48,38 @@ export function useVideoProcessor() {
     const base = useMt
       ? "https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/esm"
       : "https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm"
-    const loadOpts = useMt
-      ? {
-          coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
-          wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
-          workerURL: await toBlobURL(`${base}/ffmpeg-core.worker.js`, "text/javascript"),
-        }
-      : {
-          coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
-          wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
-        }
-    const loaded = await ff.load(loadOpts).catch(() => false as const)
 
-    if (loaded === false) return null
+    // Fetch all blob URLs in parallel — wasm is 32 MB so sequential fetching is slow
+    let loadOpts: { coreURL: string; wasmURL: string; workerURL?: string }
+    try {
+      if (useMt) {
+        const [coreURL, wasmURL, workerURL] = await Promise.all([
+          toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
+          toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
+          toBlobURL(`${base}/ffmpeg-core.worker.js`, "text/javascript"),
+        ])
+        loadOpts = { coreURL, wasmURL, workerURL }
+      } else {
+        const [coreURL, wasmURL] = await Promise.all([
+          toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
+          toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
+        ])
+        loadOpts = { coreURL, wasmURL }
+      }
+    } catch {
+      return null
+    }
+
+    // Guard against worker init deadlock: terminate + return null after 60 s
+    const loaded = await Promise.race([
+      ff.load(loadOpts).then(() => true as const, () => false as const),
+      new Promise<"timeout">((resolve) => setTimeout(() => resolve("timeout"), 60_000)),
+    ])
+
+    if (loaded !== true) {
+      ff.terminate()
+      return null
+    }
     ffmpegRef.current = ff
     return ff
   }, [])
