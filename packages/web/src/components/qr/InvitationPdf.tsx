@@ -32,35 +32,38 @@ Font.registerHyphenationCallback((word) => [word])
 
 // StyleSheet.create is static (module-level); dynamic accent colors are applied
 // as inline style merges inside the component: [base.x, { color: accent }].
+// A6 is A5 scaled by 1/sqrt(2) (~0.707) on both axes, so every fixed-pt
+// value below is the A5 original scaled by the same factor to keep the
+// card's proportions identical on the smaller page instead of overflowing it.
 const base = StyleSheet.create({
-  page: { backgroundColor: "#fdfcfb", padding: 28, fontFamily: "Lato" },
+  page: { backgroundColor: "#fdfcfb", padding: 20, fontFamily: "Lato" },
   card: {
     flex: 1,
     flexDirection: "row",
-    borderWidth: 1.5,
-    borderRadius: 14,
+    borderWidth: 1,
+    borderRadius: 10,
   },
   left: {
     flex: 1,
-    paddingVertical: 36,
-    paddingHorizontal: 38,
+    paddingVertical: 25,
+    paddingHorizontal: 27,
     justifyContent: "center",
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
   },
-  welcome: { fontSize: 9, letterSpacing: 3, marginBottom: 16 },
-  names: { fontSize: 38, fontFamily: "Crimson Text", lineHeight: 1.1 },
-  divider: { width: 44, height: 1.5, marginTop: 20, marginBottom: 18 },
-  date: { fontSize: 11 },
+  welcome: { fontSize: 6, letterSpacing: 2, marginBottom: 11 },
+  names: { fontSize: 27, fontFamily: "Crimson Text", lineHeight: 1.1 },
+  divider: { width: 31, height: 1, marginTop: 14, marginBottom: 13 },
+  date: { fontSize: 8 },
   right: {
-    width: 192,
+    width: 136,
     backgroundColor: "#ffffff",
     alignItems: "center",
     justifyContent: "center",
-    borderTopRightRadius: 12,
-    borderBottomRightRadius: 12,
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
   },
-  qr: { width: 150, height: 150 },
+  qr: { width: 106, height: 106 },
 })
 
 function hexToRgb(hex: string): [number, number, number] | null {
@@ -105,7 +108,7 @@ export function InvitationPdf({
 
   return (
     <Document title={`${event.title} — ${welcome}`}>
-      <Page size="A5" orientation="landscape" style={base.page}>
+      <Page size="A6" orientation="landscape" style={base.page}>
         <View style={[base.card, { borderColor: accent }]}>
           {/* Left: text panel with light accent tint */}
           <View style={[base.left, { backgroundColor: accentLight }]}>
